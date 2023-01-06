@@ -1,40 +1,50 @@
-const inquirer = require('inquirer');
+const inq = require('inquirer');
+const fig = require('figlet');
+const run = async () => {
+
+    fig.text('Shell TC',
+        function (err,data) {
+        if(err){
+            return;
+        }
+        console.log(data);
+        });
 
 
 
-
-function Test() {
-    const questions = [
-        {
-            name: 'username',
-            type: 'input',
-            message: 'Enter your GitHub username or e-mail address:',
-            validate: function (value) {
-                if (value.length) {
-                    return true;
-                } else {
-                    return 'Please enter your username or e-mail address.';
-                }
-            }
-            },
+    var a = inq.prompt(
+        [
             {
-                name: 'password',
-                type: 'password',
-                message: 'Enter your password:',
-                validate: function (value) {
-                    if (value.length) {
-                        return true;
-                    } else {
-                        return 'Please enter your password.';
-                    }
-                }
+            name: 'command',
+            type: 'input',
+            message: 'Entrez la commande: '
+
             }
-        ];
-        return inquirer.prompt(questions);
-    }
+        ]);
 
 
-    Test();
+    a.then(function (answer) {
+        console.log("entrée : " + answer.command);
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+run();
 
 
 
