@@ -60,6 +60,9 @@ async function action (cmd) {
       }
 
     }
+    if(cmd.command === "clear"){
+        console.clear();
+    }
 
 
 
