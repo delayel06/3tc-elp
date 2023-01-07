@@ -1,23 +1,35 @@
 import inq from 'inquirer';
 import boxen from 'boxen';
 import path from 'path';
+import psList from 'ps-list';
 
 
+
+
+
+/* constantes
+
+ */
+
+
+const running = true;
+const mainpath = path.resolve('main.js');
+
+/* initiale clear + intro
+
+ */
 console.clear();
 console.log(boxen('Shell TC v1.1', {padding: 1}));
 
-var mainpath = path.resolve('main.js');
 
+/* fonctions
 
-
+ */
 const run = async () => {
 
     const com = await line();
     console.log(com);
     action(com);
-
-
-
 
 
 }
@@ -34,18 +46,36 @@ function line() {
 
 }
 
-function action (cmd) {
+async function action (cmd) {
 
-    if(cmd.command === "test"){
-        console.log("hurrah");
+    if(cmd.command === "lp"){
+
+      console.log(boxen('Running processes'));
+
+      let processes = (await psList());
+
+      console.log('\n');
+      for(let i = 0; i < processes.length ; i++){
+          console.log(i+'. '+ processes[i].name+'\n');
+      }
 
     }
+
+
 
 
 }
 
 
-run();
+
+async function main(){
+    while(running) {
+        await run();
+    }
+
+}
+
+main();
 
 
 
