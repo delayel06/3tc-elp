@@ -19,6 +19,7 @@
   "type": "module",
   "dependencies": {
     "boxen": "^7.0.1",
-    "inquirer": "^8.0.0"
+    "inquirer": "^8.0.0",
+    "ps-list": "^8.1.1"
   }
 }
