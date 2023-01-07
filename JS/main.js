@@ -16,10 +16,10 @@ console.log(boxen('Shell TC v1.1', {padding: 1}));
 // fonctions
 const run = async () => {
 
-    const com = await line();
-    console.log(com["command"]);
-    action(com);
     exitCommand();
+    const com = await line();
+    //console.log(com["command"]);
+    await action(com);
 }
 
 function line() {
@@ -46,24 +46,55 @@ async function action (cmd) {
           console.log(i+'. '+ processes[i].name+'\n');
       }
     }
-    if(cmd.command === "clear"){
+
+    else if(cmd.command === "clear"){
         console.clear();
     }
 
-    if(/^exec /.test(cmd.command)) {
+    else if(/^exec /.test(cmd.command)) {
         let prog = cmd.command.replace(/^exec /, "");
-        console.log(prog);
+        //console.log(prog);
 
         // Execute the command
-        cp.exec(prog, (error, stdout, stderr) => {
+        await cp.exec(prog, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
             }
         });
     }
+
+    else if(/^bing /.test(cmd.command)) {
+
+        const com = cmd.command.match(/(-k|-p|-c) /);
+        const processId = cmd.command.replace(/^bing (-k|-p|-c) /,"");
+
+            if(com != null) {
+                switch (com[0]) {
+                    case '-k ':
+                        // Kill the process
+                        console.log("kill " + processId);
+                        break;
+                    case '-p ':
+                        // Pause the process
+                        console.log("pause " + processId);
+                        break;
+                    case '-c ':
+                        // Resume the process
+                        console.log("continue " + processId);
+                        break;
+                    default:
+                        console.error(`Invalid command: ${com}`);
+                        break;
+                }
+            } else {
+                console.error(`Invalid command: ${com}`);
+            }
+        }
+
+    else {console.log(cmd.command)}
 }
 
-async function exitCommand(){
+function exitCommand(){
     const stdin = process.stdin;
 
     stdin.setRawMode(true);
