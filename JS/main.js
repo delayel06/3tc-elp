@@ -2,6 +2,7 @@ import inq from 'inquirer';
 import boxen from 'boxen';
 import path from 'path';
 import psList from 'ps-list';
+import cp from 'child_process';
 
 
 // constantes
@@ -47,6 +48,18 @@ async function action (cmd) {
     }
     if(cmd.command === "clear"){
         console.clear();
+    }
+
+    if(/^exec /.test(cmd.command)) {
+        let prog = cmd.command.replace(/^exec /, "");
+        console.log(prog);
+
+        // Execute the command
+        cp.exec(prog, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+            }
+        });
     }
 }
 
