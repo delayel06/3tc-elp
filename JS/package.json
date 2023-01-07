@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Shell",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,6 +18,6 @@
   },
   "homepage": "https://github.com/delayel06/3tc-elp#readme",
   "dependencies": {
-    "inquirer": "^8.0.0"
+
   }
 }
