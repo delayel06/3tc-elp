@@ -5,7 +5,7 @@ import psList from 'ps-list';
 
 
 // constantes
-const running = true;
+var running = true;
 const mainpath = path.resolve('main.js');
 
 // initiale clear + intro
@@ -16,8 +16,9 @@ console.log(boxen('Shell TC v1.1', {padding: 1}));
 const run = async () => {
 
     const com = await line();
-    console.log(com);
+    console.log(com["command"]);
     action(com);
+    exitCommand();
 }
 
 function line() {
@@ -47,6 +48,22 @@ async function action (cmd) {
     if(cmd.command === "clear"){
         console.clear();
     }
+}
+
+async function exitCommand(){
+    const stdin = process.stdin;
+
+    stdin.setRawMode(true);
+    stdin.resume();
+    stdin.setEncoding('utf8');
+
+    stdin.on('data', key => {
+        // Ctrl+P
+        if (key === '\u0010') {
+            process.exit();
+            running = false;
+        }
+    });
 }
 
 async function main(){
