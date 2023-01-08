@@ -3,6 +3,10 @@ import boxen from 'boxen';
 import path from 'path';
 import psList from 'ps-list';
 import cp from 'child_process';
+import * as process from "process";
+import { suspend, resume } from 'ntsuspend';
+
+
 
 
 // constantes
@@ -11,15 +15,15 @@ const mainpath = path.resolve('main.js');
 
 // initiale clear + intro
 console.clear();
-console.log(boxen('Shell TC v1.1', {padding: 1}));
+console.log(boxen('Shell TC v1.2', {padding: 1}));
 
 // fonctions
 const run = async () => {
 
     exitCommand();
-    const com = await line();
+    const cmd = await line();
     //console.log(com["command"]);
-    await action(com);
+    await action(cmd);
 }
 
 function line() {
@@ -40,10 +44,12 @@ async function action (cmd) {
       console.log(boxen('Running processes'));
 
       let processes = (await psList());
+      processes.sort(compare);
+      processes.reverse(); // plus gros d'abord - souvent les plus utilisés? car OS et tout démarre avant
 
       console.log('\n');
-      for(let i = 0; i < processes.length ; i++){
-          console.log(i+'. '+ processes[i].name+'\n');
+      for(let i = 0; i < 30; i++){
+          console.log(i+1+'. '+ processes[i].name+' pid: ' + processes[i].pid +"\n");
       }
     }
 
@@ -51,7 +57,7 @@ async function action (cmd) {
         console.clear();
     }
 
-    else if(/^exec /.test(cmd.command)) {
+    else if(/^exec /.test(cmd.command)) { // REGARDER PATH VARIABLES !
         let prog = cmd.command.replace(/^exec /, "");
         //console.log(prog);
 
@@ -70,24 +76,38 @@ async function action (cmd) {
 
             if(com != null) {
                 switch (com[0]) {
-                    case '-k ':
+                    case '-k ': //Faire gaffe aux espaces dans les case
                         // Kill the process
                         console.log("kill " + processId);
+
+                            process.kill(processId);
+
+
                         break;
                     case '-p ':
                         // Pause the process
                         console.log("pause " + processId);
+                        if (process.platform === 'win32') {
+                            suspend(processId);
+                        }else{
+                            process.kill(processId, 'SIGSTOP');
+                        }
                         break;
                     case '-c ':
                         // Resume the process
                         console.log("continue " + processId);
+                        if (process.platform === 'win32') {
+                            resume(processId);
+                        }else{
+                            process.kill(processId, 'SIGCONT');
+                        }
                         break;
                     default:
                         console.error(`Invalid command: ${com}`);
                         break;
                 }
             } else {
-                console.error(`Invalid command: ${com}`);
+                console.error(`Command is null : ${com}`);
             }
         }
 
@@ -109,6 +129,21 @@ function exitCommand(){
         }
     });
 }
+
+
+//fonction pour trier les list processes par celui qui a le plus de mémoire comme ca on voit pas
+//tous les process
+//marche pas sur windows
+function compare( a, b ) {
+    if ( a.memory < b.memory ){
+        return 1;
+    }
+    if ( a.memory > b.memory ){
+        return -1;
+    }
+    return 0;
+}
+
 
 async function main(){
     while(running) {
