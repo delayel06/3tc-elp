@@ -26,8 +26,8 @@ const actions = [
         desc: 'runs a program from PATH variables or direct path'
     },
     {
-        name: 'bing (-k|-p|-c)',
-        desc: "-k (process id) kills select process "
+        name: 'bing (-k|-p|-c) (process_id)',
+        desc: "-k kills select process -p pauses and -c resumes"
     },
     {
         name: 'dir',
@@ -37,6 +37,11 @@ const actions = [
         name: 'cd (directory)',
         desc: 'navigate through directories'
     },
+    {
+        name: 'exit',
+        desc: 'exit the CLI. Shift+P also works'
+
+    }
 
 
 
@@ -105,7 +110,7 @@ async function action (cmd) {
         });
     }
 
-    else if(/^bing /.test(cmd.command)) {
+    else if(/^bing/.test(cmd.command)) {
 
         const com = cmd.command.match(/(-k|-p|-c) /);
         const processId = cmd.command.replace(/^bing (-k|-p|-c) /,"");
@@ -114,11 +119,13 @@ async function action (cmd) {
                 switch (com[0]) {
                     case '-k ': //Faire gaffe aux espaces dans les case
                         // Kill the process
-                        console.log("Process killed:  " + processId);
 
+                        try{
                             process.kill(processId);
-
-
+                            console.log("Process killed:  " + processId);
+                        }catch{
+                            console.log("Process doesn't exist ! Use lp to see process list.")
+                        }
                         break;
                     case '-p ':
                         // Pause the process
@@ -126,7 +133,11 @@ async function action (cmd) {
                         if (process.platform === 'win32') {
                             suspend(processId);
                         }else{
-                            process.kill(processId, 'SIGSTOP');
+                            try {
+                                process.kill(processId, 'SIGSTOP');
+                            }catch{
+                                console.log("Process doesn't exist ! Use lp to see process list.")
+                            }
                         }
                         break;
                     case '-c ':
@@ -138,12 +149,10 @@ async function action (cmd) {
                             process.kill(processId, 'SIGCONT');
                         }
                         break;
-                    default:
-                        console.error(`Invalid command: ${com}`);
-                        break;
+
                 }
             } else {
-                console.error(`Command is null : ${com}`);
+                console.error('Use bing -k|-p|-c (process_id) instead');
             }
         }
 
@@ -192,6 +201,11 @@ async function action (cmd) {
             console.log(chalk.whiteBright(actions[i].name + " -- " + actions[i].desc));
         }
 
+    }
+
+    else if (cmd.command === 'exit') {
+        process.exit();
+        running = false;
     }
 
     else {console.log("Unrecognized command:" + cmd.command)}
