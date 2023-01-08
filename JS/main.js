@@ -191,16 +191,41 @@ async function action (cmd) {
     }
 
     else if (/^!/.test(cmd.command)) {
-
-        if(process.platform == 'win32'){
-            var prog = 'start ' + cmd.command.replace(/^!/, "");
+        var prog;
+        if(process.platform === 'win32'){
+            prog = 'start /min ' + cmd.command.replace(/^!/, "");
         } else {
-            var prog = cmd.command.replace(/^!/, "") + '$';
+            prog = cmd.command.replace(/^!/, "") + '&';
         }
 
-        const child = cp.spawn(prog, { detached: true, stdio: 'ignore' });
-        //child.unref();
-        }
+        const child = await cp.exec(prog, { detached: true, stdio: 'ignore'}, async (error) => {
+            if (error) {
+                await console.error(`exec error: ${error}`);
+            }
+        });
+        child.unref();
+        child.stdout.on('data', data => {
+            console.log(`stdout: ${data}`);
+        });
+
+        child.stderr.on('data', data => {
+            console.error(`stderr: ${data}`);
+        });
+
+        child.on('close', code => {
+            console.log(`child process exited with code ${code}`);
+        });
+
+    }
+
+    else if(/^keep /.test(cmd.command)) {
+        let processId = cmd.command.replace(/^keep /, "");
+        cp.exec(`nohup kill -CONT ${processId} > /dev/null 2>&1 &`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+            }
+        });
+    }
 
     else {console.log("Unrecognized command:" + cmd.command)}
 }
