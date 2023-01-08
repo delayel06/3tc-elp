@@ -22,12 +22,20 @@ const actions = [
         desc: 'clears the console'
     },
     {
-        name: 'exec',
+        name: 'exec (path-to-program)',
         desc: 'runs a program from PATH variables or direct path'
     },
     {
-        name: 'bing',
+        name: 'bing (-k|-p|-c)',
         desc: "-k (process id) kills select process "
+    },
+    {
+        name: 'dir',
+        desc: 'displays the files and folders in the current directory'
+    },
+    {
+        name: 'cd (directory)',
+        desc: 'navigate through directories'
     },
 
 
@@ -40,6 +48,7 @@ const actions = [
 // initiale clear + intro
 console.clear();
 console.log(chalk.yellow(boxen('Shell TC v1.3', {padding: 1})));
+console.log(chalk.green("Run 'help' to see available commands "));
 
 //fonctionenment
 const run = async () => {
@@ -179,7 +188,9 @@ async function action (cmd) {
 
     else if (cmd.command === 'help'){
 
-
+        for(let i = 0 ; i < actions.length ; i++){
+            console.log(chalk.whiteBright(actions[i].name + " -- " + actions[i].desc));
+        }
 
     }
 
