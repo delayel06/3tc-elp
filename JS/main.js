@@ -7,8 +7,6 @@ import { suspend, resume } from 'ntsuspend';
 import chalk from 'chalk';
 import fs from 'fs';
 
-
-
 // variables
 var running = true;
 var mainpath = process.cwd();
@@ -40,15 +38,8 @@ const actions = [
     {
         name: 'exit',
         desc: 'exit the CLI. Shift+P also works'
-
     }
-
-
-
-
-]
-
-
+    ]
 
 // initiale clear + intro
 console.clear();
@@ -156,11 +147,9 @@ async function action (cmd) {
             }
         }
 
-    else if(/^cd/.test(cmd.command)) {
+    else if(/^cd(..$|| )/.test(cmd.command)) {
 
-        let pathname = cmd.command.replace(/^cd /,"");
-
-        if(pathname === 'cd..'){pathname = '..'} //exceptions chiantes à cause de l'espace
+        let pathname = cmd.command.replace(/^cd ?/,"");
 
         if(process.platform !== 'win32'){
             if(pathname === '..'){
@@ -170,13 +159,9 @@ async function action (cmd) {
 
         try{
             process.chdir(pathname);
-
-
         }catch (e) {
             console.log("Please enter a valid path !");
         }
-
-
     }
 
     else if ((cmd.command) === 'dir'){
@@ -188,11 +173,9 @@ async function action (cmd) {
                     console.log(chalk.red(files[i]));
                 } else {
                     console.log(chalk.yellowBright(files[i]));
-
                 }
             }
         });
-
     }
 
     else if (cmd.command === 'help'){
@@ -200,13 +183,24 @@ async function action (cmd) {
         for(let i = 0 ; i < actions.length ; i++){
             console.log(chalk.whiteBright(actions[i].name + " -- " + actions[i].desc));
         }
-
     }
 
     else if (cmd.command === 'exit') {
         process.exit();
         running = false;
     }
+
+    else if (/^!/.test(cmd.command)) {
+
+        if(process.platform == 'win32'){
+            var prog = 'start ' + cmd.command.replace(/^!/, "");
+        } else {
+            var prog = cmd.command.replace(/^!/, "") + '$';
+        }
+
+        const child = cp.spawn(prog, { detached: true, stdio: 'ignore' });
+        //child.unref();
+        }
 
     else {console.log("Unrecognized command:" + cmd.command)}
 }
@@ -223,6 +217,7 @@ function exitCommand(){
         if (key === '\u0010') {
             process.exit();
             running = false;
+            console.log("bug");
         }
     });
 }
@@ -231,11 +226,11 @@ function exitCommand(){
 //fonction pour trier les list processes par celui qui a le plus de mémoire comme ca on voit pas
 //tous les process
 //marche pas sur windows
-function compare( a, b ) {
-    if ( a.memory < b.memory ){
+function compare( a, b) {
+    if ( a.memory < b.memory){
         return -1;
     }
-    if ( a.memory > b.memory ){
+    if ( a.memory > b.memory){
         return 1;
     }
     return 0;
