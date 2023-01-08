@@ -1,6 +1,7 @@
 {
   "name": "js",
   "version": "1.0.0",
+  "authors": "Lilian Delaye , Jean Peaurroy",
   "description": "Shell",
   "main": "main.js",
   "scripts": {
@@ -19,8 +20,10 @@
   "type": "module",
   "dependencies": {
     "boxen": "^7.0.1",
+    "chalk": "^5.2.0",
     "child_process": "^1.0.2",
     "inquirer": "^8.0.0",
+    "ntsuspend": "^1.0.2",
     "process": "^0.11.10",
     "ps-list": "^8.1.1"
   }

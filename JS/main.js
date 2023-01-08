@@ -1,26 +1,51 @@
 import inq from 'inquirer';
 import boxen from 'boxen';
-import path from 'path';
 import psList from 'ps-list';
 import cp from 'child_process';
 import * as process from "process";
 import { suspend, resume } from 'ntsuspend';
 import chalk from 'chalk';
+import fs from 'fs';
 
 
 
-// constantes
+// variables
 var running = true;
-const mainpath = path.resolve('main.js');
+var mainpath = process.cwd();
+const actions = [
+    { // La je fais un fonction dans l'array pour avoir des types
+        name: 'lp',
+        desc: 'lists the running processes on the machine'
+    },
+    {
+        name: 'clear',
+        desc: 'clears the console'
+    },
+    {
+        name: 'exec',
+        desc: 'runs a program from PATH variables or direct path'
+    },
+    {
+        name: 'bing',
+        desc: "-k (process id) kills select process "
+    },
+
+
+
+
+]
+
+
 
 // initiale clear + intro
 console.clear();
-console.log(chalk.yellow(boxen('Shell TC v1.2', {padding: 1})));
+console.log(chalk.yellow(boxen('Shell TC v1.3', {padding: 1})));
 
-// fonctions
+//fonctionenment
 const run = async () => {
 
     exitCommand();
+    mainpath = process.cwd();
     const cmd = await line();
     //console.log(com["command"]);
     await action(cmd);
@@ -37,6 +62,8 @@ function line() {
         ]);
 }
 
+
+//actions
 async function action (cmd) {
 
     if(cmd.command === "lp"){
@@ -62,7 +89,7 @@ async function action (cmd) {
         //console.log(prog);
 
         // Execute the command
-        await cp.exec(prog, (error, stdout, stderr) => {
+        await cp.exec(prog, (error) => {
             if (error) {
                 console.error(`exec error: ${error}`);
             }
@@ -111,7 +138,52 @@ async function action (cmd) {
             }
         }
 
-    else {console.log(cmd.command)}
+    else if(/^cd/.test(cmd.command)) {
+
+        let pathname = cmd.command.replace(/^cd /,"");
+
+        if(pathname === 'cd..'){pathname = '..'} //exceptions chiantes à cause de l'espace
+
+        if(process.platform !== 'win32'){
+            if(pathname === '..'){
+                pathname = '../';
+            }
+        }
+
+        try{
+            process.chdir(pathname);
+
+
+        }catch (e) {
+            console.log("Please enter a valid path !");
+        }
+
+
+    }
+
+    else if ((cmd.command) === 'dir'){
+
+        fs.readdir(mainpath, (err, files) => {
+            console.log("\n");
+            for(let i = 0 ; i < files.length ; i++) {
+                if (/[.]/.test(files[i])) {
+                    console.log(chalk.red(files[i]));
+                } else {
+                    console.log(chalk.yellowBright(files[i]));
+
+                }
+            }
+        });
+
+    }
+
+    else if (cmd.command === 'help'){
+
+
+
+    }
+
+    else {console.log("Unrecognized command:" + cmd.command)}
 }
 
 function exitCommand(){
@@ -143,6 +215,8 @@ function compare( a, b ) {
     }
     return 0;
 }
+
+
 
 
 async function main(){
