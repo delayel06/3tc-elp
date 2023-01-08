@@ -5,7 +5,7 @@ import psList from 'ps-list';
 import cp from 'child_process';
 import * as process from "process";
 import { suspend, resume } from 'ntsuspend';
-
+import chalk from 'chalk';
 
 
 
@@ -15,7 +15,7 @@ const mainpath = path.resolve('main.js');
 
 // initiale clear + intro
 console.clear();
-console.log(boxen('Shell TC v1.2', {padding: 1}));
+console.log(chalk.yellow(boxen('Shell TC v1.2', {padding: 1})));
 
 // fonctions
 const run = async () => {
@@ -32,7 +32,7 @@ function line() {
             {
                 name: 'command',
                 type: 'input',
-                message: mainpath + ' $ '
+                message: chalk.blue(mainpath + ' $ ')
             }
         ]);
 }
@@ -41,7 +41,7 @@ async function action (cmd) {
 
     if(cmd.command === "lp"){
 
-      console.log(boxen('Running processes'));
+        console.log(chalk.green(boxen('Running processes')));
 
       let processes = (await psList());
       processes.sort(compare);
@@ -49,7 +49,7 @@ async function action (cmd) {
 
       console.log('\n');
       for(let i = 0; i < 30; i++){
-          console.log(i+1+'. '+ processes[i].name+' pid: ' + processes[i].pid +"\n");
+          console.log(chalk.yellow(i+1)+'. '+ processes[i].name+' pid: ' + chalk.red(processes[i].pid) +"\n");
       }
     }
 
@@ -78,7 +78,7 @@ async function action (cmd) {
                 switch (com[0]) {
                     case '-k ': //Faire gaffe aux espaces dans les case
                         // Kill the process
-                        console.log("kill " + processId);
+                        console.log("Process killed:  " + processId);
 
                             process.kill(processId);
 
@@ -86,7 +86,7 @@ async function action (cmd) {
                         break;
                     case '-p ':
                         // Pause the process
-                        console.log("pause " + processId);
+                        console.log("Process paused: " + processId);
                         if (process.platform === 'win32') {
                             suspend(processId);
                         }else{
@@ -95,7 +95,7 @@ async function action (cmd) {
                         break;
                     case '-c ':
                         // Resume the process
-                        console.log("continue " + processId);
+                        console.log("Process resumed: " + processId);
                         if (process.platform === 'win32') {
                             resume(processId);
                         }else{
@@ -136,10 +136,10 @@ function exitCommand(){
 //marche pas sur windows
 function compare( a, b ) {
     if ( a.memory < b.memory ){
-        return 1;
+        return -1;
     }
     if ( a.memory > b.memory ){
-        return -1;
+        return 1;
     }
     return 0;
 }
