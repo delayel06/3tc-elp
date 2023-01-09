@@ -147,7 +147,7 @@ async function action (cmd) {
             }
         }
 
-    else if(/^cd(..$|| )/.test(cmd.command)) {
+    else if(/^cd(..$| )/.test(cmd.command)) {
 
         let pathname = cmd.command.replace(/^cd ?/,"");
 
@@ -220,7 +220,7 @@ async function action (cmd) {
 
     else if(/^keep /.test(cmd.command)) {
         let processId = cmd.command.replace(/^keep /, "");
-        cp.exec(`nohup kill -CONT ${processId} > /dev/null 2>&1 &`, (error, stdout, stderr) => {
+        cp.exec(`nohup kill -CONT ${processId} > /dev/null 2>&1 &`, (error) => {
             if (error) {
                 console.error(`exec error: ${error}`);
             }
