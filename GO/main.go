@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 func read(filename string) [][]int {
@@ -18,14 +19,11 @@ func read(filename string) [][]int {
 	scanner := bufio.NewScanner(file)
 	var matrice [][]int
 	for scanner.Scan() {
-		text := scanner.Text()
-
-		temp := strings.Fields(text) //  Fields = split python mais en moins bien ici tout ca pour une boucle classique qui parcourt une ligne
-		print(temp)
+		temp := strings.Fields(scanner.Text()) //  Fields = split python mais en moins bien ici tout ca pour une boucle classique qui parcourt une ligne
 		var ligne []int
-		for i := 0; i < len(temp); i++ { //
+		for _, i := range temp { //
 			//https://www.educative.io/answers/what-is-the-fields-function-in-go
-			n, err := strconv.Atoi(temp[i]) // convert string en entier https://pkg.go.dev/strconvl
+			n, err := strconv.Atoi(i) // convert string en entier https://pkg.go.dev/strconvl
 			if err != nil {
 				return nil
 			}
@@ -40,12 +38,13 @@ func read(filename string) [][]int {
 	return matrice
 }
 
-func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
+var wg sync.WaitGroup
 
+func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
 	for k := 0; k < len(two[0]); k++ {
 		result[i][j] += one[i][k] * two[k][j]
 	}
-
+	wg.Done()
 }
 
 func main() { //Scanner fichier de la doc golang
@@ -53,27 +52,26 @@ func main() { //Scanner fichier de la doc golang
 	mat1 := read("mat1.txt")
 	mat2 := read("mat2.txt") //peut pas utiliser mat2 encore
 
-	var result [][]int
-	for j := 0; j < len(mat1); j++ { // mat result taille mat 1 colonnes x mat 2 ligne
-
-		var ligner []int
-		for k := 0; k < len(mat2[0]); k++ {
-			ligner = append(ligner) // on rempli de 0 pour avoir une matrice résultat pseudo vide
-		}
-		result = append(result, ligner)
-	} // init result
+	result := make([][]int, len(mat1))
+	for i := range result {
+		result[i] = make([]int, len(mat2[0]))
+	}
 
 	for i := 0; i < len(mat1); i++ { // calc the matrice numbers yes
 		for j := 0; j < len(mat2[0]); j++ {
-			// ** go calc(mat1, mat2, result, i, j) // concurrence fait tout seul insh
-			// tableaux modifiés globallement comme java?
+			wg.Add(1)
+			go calc(mat1, mat2, result, i, j) // concurrence fait tout seul insh
+			// tableaux modifiés globallement comme java
 		}
 	}
 
-	for i := 0; i < len(mat2); i++ {
+	// Wait for all the goroutines to finish
+	wg.Wait()
 
-		for j := 0; j < len(mat2[0]); j++ {
-			fmt.Printf("%d ", mat2[i][j]) //d format = int
+	for i := 0; i < len(result); i++ {
+
+		for j := 0; j < len(result[0]); j++ {
+			fmt.Printf("%d ", result[i][j]) //d format = int
 		}
 
 		fmt.Println()
