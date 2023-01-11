@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -23,9 +22,11 @@ func read(filename string) ([][]int, error) {
 
 		var row []int
 		for _, s := range line {
-			n, err := strconv.Atoi(s)
+
+			n, err := strconv.Atoi(s) // https://pkg.go.dev/strconv on convertit text en int parce que c'est plus cool
+
 			if err != nil {
-				return nil, err
+				return nil
 			}
 			row = append(row, n)
 		}
@@ -34,20 +35,16 @@ func read(filename string) ([][]int, error) {
 	}
 
 	// Return the matrix
-	return matrice, nil
+	return matrice
 }
 
 func main() { //Scanner fichier de la doc golang
 
-	matone, err := read("mat1.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
+	matone := read("mat1.txt")
+
 	fmt.Print(matone)
-	mattwo, err := read("mat2.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
+	mattwo := read("mat2.txt")
+
 	fmt.Print(mattwo)
 
 }
