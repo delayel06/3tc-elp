@@ -23,7 +23,7 @@ func read(filename string) [][]int {
 		temp := strings.Fields(text) //  Fields = split python mais en moins bien ici tout ca pour une boucle classique qui parcourt une ligne
 		fmt.Print(temp)              // error check, a enlever
 		var ligne []int
-		for i := 0; i < 3; i++ { //
+		for i := 0; i < len(temp); i++ { //
 			//https://www.educative.io/answers/what-is-the-fields-function-in-go
 			n, err := strconv.Atoi(temp[i]) // convert string en entier https://pkg.go.dev/strconvl
 			if err != nil {
@@ -40,23 +40,43 @@ func read(filename string) [][]int {
 	return matrice
 }
 
+func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
+
+	for k := 0; k < len(two[0]); k++ {
+		result[i][j] += one[i][k] * two[k][j]
+	}
+
+}
+
 func main() { //Scanner fichier de la doc golang
 
 	mat1 := read("mat1.txt")
-	mat2 := read("mat2.txt")         //peut pas utiliser mat2 encore
-	for i := 0; i < len(mat1); i++ { //j'arrive pas a afficher?
-		fmt.Println("%d ", mat1[i])
-		fmt.Print(",")
-	}
+	mat2 := read("mat2.txt") //peut pas utiliser mat2 encore
 
 	var result [][]int
-	for j := 0; j < len(mat1); j++ {
+	for j := 0; j < len(mat1); j++ { // mat result taille mat 1 colonnes x mat 2 ligne
 
 		var ligner []int
 		for k := 0; k < len(mat2[0]); k++ {
-			ligner = append(ligner, 0) // on rempli de 0 pour avoir une matrice résultat pseudo vide
+			ligner = append(ligner) // on rempli de 0 pour avoir une matrice résultat pseudo vide
 		}
 		result = append(result, ligner)
+	} // init result
+
+	for i := 0; i < len(mat1); i++ { // calc the matrice numbers yes
+		for j := 0; j < len(mat2[0]); j++ {
+			go calc(mat1, mat2, result, i, j) // concurrence fait tout seul insh
+			// tableaux modifiés globallement comme java?
+		}
+	}
+
+	for i := 0; i < len(result); i++ {
+
+		for j := 0; j < len(result[i]); j++ {
+			fmt.Printf("%d ", result[i][j]) //d format = int
+		}
+
+		fmt.Println()
 	}
 
 }
