@@ -48,13 +48,17 @@ func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
 	wg.Done()
 }
 
-func listentcp(c net.Conn) {
+func convert(res [][]int) {
+
+}
+
+func tcp(c net.Conn) {
 	var stockage = make([]byte, 9999) // gros data jsp quelle taille il faut
 	data, erreur := c.Read(stockage)  // lis les données et les stock dans stockage
 	if erreur != nil {
 		fmt.Println("Arrive pas a lire data")
 	}
-	file, err := os.Create("mat1.txt")
+	file, err := os.Create("mat1new.txt")
 	if err != nil {
 		fmt.Print("arrive pas a creer fichier")
 	}
@@ -62,11 +66,13 @@ func listentcp(c net.Conn) {
 	file.Write(stockage[:data]) // ecrit que les données recues, -> s'arrete a data parce que c'est la longueur
 	file.Close()                // erreurs on fera plus tard
 
-}
+	var outfile, errr = os.Create("result.txt")
+	if errr != nil {
+		return
+	}
 
-func main() { //Scanner fichier de la doc golang
-
-	mat1 := read("mat1.txt")
+	// pris le ancien code de main et mis ici
+	mat1 := read("mat1new.txt")
 	mat2 := read("mat2.txt") //peut pas utiliser mat2 encore
 
 	result := make([][]int, len(mat1))
@@ -82,16 +88,44 @@ func main() { //Scanner fichier de la doc golang
 		}
 	}
 
-	// Wait for all the goroutines to finish
 	wg.Wait()
 
-	for i := 0; i < len(result); i++ {
+	resultconverted := convert(result) // pas encore fait conversion  !
 
-		for j := 0; j < len(result[0]); j++ {
-			fmt.Printf("%d ", result[i][j]) //d format = int
+	outfile.Write(resultconverted)
+	outfile.Close()
+
+	outgoingFile, err := os.Open("result.txt")
+	if err != nil {
+		fmt.Println("aled j'arrive pas a ouvrir un fichier")
+	}
+	defer outgoingFile.Close()
+
+	outfilescan := bufio.NewScanner(outfile)
+	outfilescan.Split(bufio.ScanBytes)
+
+	for outfilescan.Scan() { // retourne vrai tant que ya des trucs à lire donc s'arrete quand plus rien a envoyer niquel
+		c.Write(outfilescan.Bytes())
+	}
+
+	c.Close()
+}
+
+func main() { //Scanner fichier de la doc golang
+
+	lst, err := net.Listen("tcp", ":8000")
+	if err != nil {
+		fmt.Println("a l'aide j'arrive pas a ecouter tcp !")
+
+	}
+
+	for { // pour chaque demande je fais groutine
+		c, err201 := lst.Accept()
+		if err201 != nil {
+			fmt.Println("a l'aide j'arrive pas a accepter tcp !")
+			os.Exit(1)
 		}
-
-		fmt.Println()
+		go tcp(c) // GROUTINE
 	}
 
 }
