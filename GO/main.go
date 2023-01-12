@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/binary"
 	"fmt"
 	"net"
 	"os"
@@ -48,8 +50,18 @@ func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
 	wg.Done()
 }
 
-func convert(res [][]int) {
+func convert(res [][]int) []byte {
 
+	var buffer bytes.Buffer
+	//boucle parcours simple
+	for i := 0; i < len(res); i++ {
+		for j := 0; j < len(res[0]); j++ {
+
+			binary.Write(&buffer, binary.LittleEndian, int32(j)) //https://pkg.go.dev/encoding/binary#Write chelou un peu
+		}
+	}
+
+	return buffer.Bytes()
 }
 
 func tcp(c net.Conn) {
