@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -38,13 +39,29 @@ func read(filename string) [][]int {
 	return matrice
 }
 
-var wg sync.WaitGroup
+var wg sync.WaitGroup // pourquoi tu as mis ce truc ici en particulier
 
 func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
 	for k := 0; k < len(two[0]); k++ {
 		result[i][j] += one[i][k] * two[k][j]
 	}
 	wg.Done()
+}
+
+func listentcp(c net.Conn) {
+	var stockage = make([]byte, 9999) // gros data jsp quelle taille il faut
+	data, erreur := c.Read(stockage)  // lis les données et les stock dans stockage
+	if erreur != nil {
+		fmt.Println("Arrive pas a lire data")
+	}
+	file, err := os.Create("mat1.txt")
+	if err != nil {
+		fmt.Print("arrive pas a creer fichier")
+	}
+
+	file.Write(stockage[:data]) // ecrit que les données recues, -> s'arrete a data parce que c'est la longueur
+	file.Close()                // erreurs on fera plus tard
+
 }
 
 func main() { //Scanner fichier de la doc golang
