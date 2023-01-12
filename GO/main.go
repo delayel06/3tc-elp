@@ -41,7 +41,7 @@ func read(filename string) [][]int {
 	return matrice
 }
 
-var wg sync.WaitGroup // pourquoi tu as mis ce truc ici en particulier
+var wg sync.WaitGroup
 
 func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
 	for k := 0; k < len(two[0]); k++ {
@@ -65,10 +65,12 @@ func convert(res [][]int) []byte {
 }
 
 func tcp(c net.Conn) {
-	var stockage = make([]byte, 9999) // gros data jsp quelle taille il faut
+	var stockage = make([]byte, 2048) // gros data jsp quelle taille il faut
 	data, erreur := c.Read(stockage)  // lis les données et les stock dans stockage
 	if erreur != nil {
 		fmt.Println("Arrive pas a lire data")
+	} else {
+		fmt.Println("cool raoul jai recu: ", data)
 	}
 	file, err := os.Create("mat1new.txt")
 	if err != nil {
@@ -76,13 +78,13 @@ func tcp(c net.Conn) {
 	}
 
 	file.Write(stockage[:data]) // ecrit que les données recues, -> s'arrete a data parce que c'est la longueur
-	file.Close()                // erreurs on fera plus tard
+	defer file.Close()          // erreurs on fera plus tard
 
 	var outfile, errr = os.Create("result.txt")
 	if errr != nil {
 		return
 	}
-
+	defer c.Close()
 	// pris le ancien code de main et mis ici
 	mat1 := read("mat1new.txt")
 	mat2 := read("mat2.txt") //peut pas utiliser mat2 encore
@@ -120,12 +122,11 @@ func tcp(c net.Conn) {
 		c.Write(outfilescan.Bytes())
 	}
 
-	c.Close()
 }
 
 func main() { //Scanner fichier de la doc golang
 
-	lst, err := net.Listen("tcp", ":8000")
+	lst, err := net.Listen("tcp", "localhost:8000")
 	if err != nil {
 		fmt.Println("a l'aide j'arrive pas a ecouter tcp !")
 

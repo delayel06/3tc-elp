@@ -15,13 +15,12 @@ func main() {
 
 	file, _ := os.Open("mat1.txt")
 
-	var _ = file.Close() //erreur negligée
-
 	data, _ := io.Copy(c, file) //https://pkg.go.dev/io#Copy
 	//data = nombre de bytes envoyé
 
+	var _ = file.Close()          //erreur negligée
 	fmt.Println("envoyé: ", data) // test voir ce qu'on a send
 
-	var _ = c.Close() //erreur negligée
+	c.Close() //erreur negligée
 
 }
