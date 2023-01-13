@@ -28,6 +28,15 @@ func main() {
 	} else {
 		fmt.Println("cool raoul jai recu: ", newdata)
 	}
+	fmt.Println(string(stockage[:data]))
+
+	file, err := os.Create("result.txt")
+	if err != nil {
+		fmt.Print("arrive pas a creer fichier")
+	}
+
+	file.Write(stockage[:data])
+	defer file.Close()
 
 	defer c.Close() //erreur negligée// erreurs on fera plus tard
 }

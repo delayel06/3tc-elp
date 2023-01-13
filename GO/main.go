@@ -11,6 +11,24 @@ import (
 	"sync"
 )
 
+func strtointsplice(s string) [][]int {
+	rows := strings.Split(s, "\n")
+	var splice [][]int
+	for i := 0; i < len(rows); i++ {
+		cols := strings.Split(rows[i], " ")
+		var row []int // creer un truc a ajouter apres
+		for j := 0; j < len(cols); j++ {
+
+			num, _ := strconv.Atoi(cols[j])
+
+			row = append(row, num) // doit append parce que on a pas initializé de taille -> dynamique
+			//on ajout a chaque row le num puis chaque row jusqu'a la fin
+		}
+		splice = append(splice, row)
+	}
+
+	return splice
+}
 func read(filename string) [][]int {
 	file, err := os.Open(filename) //on ouvre le fichier qui contient la matrice !!! attention renvoie fichier ET erreur
 	if err != nil {                //gestion de l'erreur pour voir si le fichier existe
@@ -49,11 +67,7 @@ func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
 	wg.Done()
 }
 
-func process() [][]int {
-
-	// pris le ancien code de main et mis ici
-	mat1 := read("mat1new.txt")
-	mat2 := read("mat2.txt") //peut pas utiliser mat2 encore
+func process(mat1 [][]int, mat2 [][]int) [][]int {
 
 	result := make([][]int, len(mat1))
 	for i := range result {
@@ -76,21 +90,18 @@ func process() [][]int {
 func tcp(c net.Conn) {
 	var stockage = make([]byte, 2048) // gros data jsp quelle taille il faut
 	data, erreur := c.Read(stockage)  // lis les données et les stock dans stockage
+
 	if erreur != nil {
 		fmt.Println("Arrive pas a lire data")
 	} else {
-		fmt.Println("cool raoul jai recu: ", data)
+		fmt.Println("(serv) cool raoul jai recu: ", data)
 	}
-	file, err := os.Create("mat1new.txt")
-	if err != nil {
-		fmt.Print("arrive pas a creer fichier")
-	}
-	defer c.Close()
 
-	file.Write(stockage[:data]) // ecrit que les données recues, -> s'arrete a data parce que c'est la longueur
-	defer file.Close()          // erreurs on fera plus tard
+	matreceived := string(stockage[:data])
 
-	result := process()
+	result := process(strtointsplice(matreceived), read("mat2.txt"))
+	fmt.Println(strtointsplice(matreceived), "et autre : ", read("mat2.txt"))
+	fmt.Println("result:", result)
 	wg.Wait()
 
 	var outfile, errr = os.Create("result.txt")
@@ -112,6 +123,7 @@ func tcp(c net.Conn) {
 			fmt.Println("arrive pas a ecrire apres calc")
 		}
 	}
+
 	w.Flush() // apparament il faut ca mais vu qu'on ecrit pas apres peut etre pas
 
 	filetosend, _ := os.Open("result.txt")
