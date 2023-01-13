@@ -4,47 +4,61 @@ import Browser
 import Html exposing(..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http
 
 -- MAIN
 
-main = Browser.sandbox {init = init, update = update, view = view}
+main = Browser.element { init = init , update = update , subscriptions = subscriptions , view = view }
 
 
 -- MODEL
 
+type State = Success String | Failure | Loading
+
 type alias Model = 
     {
-        wordSubmit : String
+        wordToGuess : String
+        , wordSubmit : String
         , score : Int
         , timer : Int
+        , httpState : State
     }
 
-init : Model
-init = 
-    Model "" 0 60
+init : () -> ( Model , Cmd Msg )
+init _ = 
+    ( Model "hello world" "" 0 60 Loading
+    , Http.get {
+          url = "https://www.palabrasaleatorias.com/mots-aleatoires.php?fs=1&fs2=0&Submit=Nouveau+mot)"
+        , expect = Http.expectString GotText
+        }
+    ) 
 
 
 -- UPDATE
 
 type Msg
-    = Change String | IncrementScore Int | DecrementScore Int | IncrementTimer Int | DecrementTimer Int | Submit | Pass
+    = Change String | Submit | Pass | GotText (Result Http.Error String)
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model , Cmd Msg )
 update msg model = 
     case msg of
-        Change word -> { model | wordSubmit = word } 
+        Change word -> ( { model | wordSubmit = word } , Cmd.none )
 
-        IncrementScore val -> { model | score = model.score + 1 }
+        Submit -> if model.wordSubmit == model.wordToGuess then ( { model | score = model.score + 1 , wordSubmit = "" } , Cmd.none ) else ( { model | score = model.score - 1 , wordSubmit = "" } , Cmd.none )
 
-        DecrementScore val -> { model | score = model.score - 1 }
+        Pass -> ( { model | wordSubmit = "" } , Cmd.none )
 
-        IncrementTimer val -> { model | timer = model.timer + 1 }
+        GotText result -> case result of
+            Ok fullText ->
+                ({ model | httpState = Success fullText } , Cmd.none)
 
-        DecrementTimer val -> { model | timer = model.timer - 1 }
+            Err _ ->
+                ({ model | httpState = Failure } , Cmd.none)
 
-        Submit -> { model | wordSubmit = "" } 
 
-        Pass -> { model | wordSubmit = "" }
+-- SUBSCRIPTIONS
+subscriptions : Model -> Sub Msg
+subscriptions model = Sub.none
 
 
 -- VIEW
