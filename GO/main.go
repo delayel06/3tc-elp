@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"strconv"
@@ -112,6 +113,10 @@ func tcp(c net.Conn) {
 		}
 	}
 	w.Flush() // apparament il faut ca mais vu qu'on ecrit pas apres peut etre pas
+
+	filetosend, _ := os.Open("result.txt")
+	sentdata, _ := io.Copy(c, filetosend)
+	fmt.Print("serv envoyé :", sentdata)
 
 }
 

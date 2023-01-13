@@ -21,6 +21,13 @@ func main() {
 	var _ = file.Close()          //erreur negligée
 	fmt.Println("envoyé: ", data) // test voir ce qu'on a send
 
-	defer c.Close() //erreur negligée// erreurs on fera plus tard
+	var stockage = make([]byte, 2048)   // gros data jsp quelle taille il faut
+	newdata, erreur := c.Read(stockage) // lis les données et les stock dans stockage
+	if erreur != nil {
+		fmt.Println("Arrive pas a lire data cli")
+	} else {
+		fmt.Println("cool raoul jai recu: ", newdata)
+	}
 
+	defer c.Close() //erreur negligée// erreurs on fera plus tard
 }
