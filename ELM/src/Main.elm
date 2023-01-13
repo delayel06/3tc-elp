@@ -5,6 +5,7 @@ import Html exposing(..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
+import Time
 
 -- MAIN
 
@@ -37,7 +38,7 @@ init _ =
 -- UPDATE
 
 type Msg
-    = Change String | Submit | Pass | GotText (Result Http.Error String)
+    = Change String | Submit | Pass | GotText (Result Http.Error String) | Tick Time.Posix
 
 update : Msg -> Model -> ( Model , Cmd Msg )
 update msg model = 
@@ -48,6 +49,8 @@ update msg model =
 
         Pass -> ( { model | wordSubmit = "" } , Cmd.none )
 
+        Tick newTime ->  ({ model | timer = model.timer - 1 } , Cmd.none) 
+ 
         GotText result -> case result of
             Ok fullText ->
                 ({ model | httpState = Success fullText } , Cmd.none)
@@ -58,17 +61,17 @@ update msg model =
 
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
-subscriptions model = Sub.none
-
+subscriptions model =
+    if model.timer > 0 then Time.every 1000 Tick else Sub.none
 
 -- VIEW
 
 view : Model -> Html Msg
 view model = div [] [
-      header [] [ text "Elmphabetic"]
-    , div [] [ text ("Score : " ++ (String.fromInt model.score))
+      header [style "color" "blue" , style "font-family" "verdana" , style "font-size" "300%"] [ text "Elmphabetic"]
+    , div [ style "font-size" "150%" , style "margin" "8px 20px" ] [ text ("Score : " ++ (String.fromInt model.score))
              , text ("TimeLeft : " ++ (String.fromInt model.timer))]
-    , div [] [ 
+    , div [style "display" "block"] [ 
         text """
             Lorem ipsum dolor sit amet. Sit laborum quis ut voluptatem voluptas est nobis velit. Sit possimus nobis non harum natus et ipsa assumenda id voluptas 
             provident in reiciendis autem est odit tempora. Qui reprehenderit obcaecati sed expedita officiis vel delectus voluptas sit voluptatem velit At expedita 
@@ -79,5 +82,5 @@ view model = div [] [
             dolor voluptatum! 33 sint corrupti sit suscipit praesentium ut quia cumque.
             """
         , input [ placeholder "Type your guess here !", value model.wordSubmit, onInput Change] [] ]
-        , div [] [ button [ onClick Submit] [ text "Submit"]
-                 , button [onClick Pass ] [ text "Pass" ] ] ]
+    , div [] [ button [ onClick Submit, style "padding" "15px 32px", style "margin" "8px 20px" ] [ text "Submit"]
+                , button [onClick Pass, style "padding" "15px 32px", style "margin" "8px 20px" ] [ text "Pass" ] ] ]
