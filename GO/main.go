@@ -2,8 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"net"
 	"os"
@@ -50,18 +48,28 @@ func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
 	wg.Done()
 }
 
-func convert(res [][]int) []byte {
+func process() [][]int {
 
-	var buffer bytes.Buffer
-	//boucle parcours simple
-	for i := 0; i < len(res); i++ {
-		for j := 0; j < len(res[0]); j++ {
+	// pris le ancien code de main et mis ici
+	mat1 := read("mat1new.txt")
+	mat2 := read("mat2.txt") //peut pas utiliser mat2 encore
 
-			binary.Write(&buffer, binary.LittleEndian, int32(j)) //https://pkg.go.dev/encoding/binary#Write chelou un peu
+	result := make([][]int, len(mat1))
+	for i := range result {
+		result[i] = make([]int, len(mat2[0]))
+	}
+
+	for i := 0; i < len(mat1); i++ { // calc the matrice numbers yes
+		for j := 0; j < len(mat2[0]); j++ {
+			wg.Add(1)
+			go calc(mat1, mat2, result, i, j) // concurrence fait tout seul insh
+			fmt.Print("fais calc\n")          // test
+			// tableaux modifiés globallement comme java
 		}
 	}
 
-	return buffer.Bytes()
+	return result
+
 }
 
 func tcp(c net.Conn) {
@@ -76,51 +84,34 @@ func tcp(c net.Conn) {
 	if err != nil {
 		fmt.Print("arrive pas a creer fichier")
 	}
+	defer c.Close()
 
 	file.Write(stockage[:data]) // ecrit que les données recues, -> s'arrete a data parce que c'est la longueur
 	defer file.Close()          // erreurs on fera plus tard
+
+	result := process()
+	wg.Wait()
 
 	var outfile, errr = os.Create("result.txt")
 	if errr != nil {
 		return
 	}
-	defer c.Close()
-	// pris le ancien code de main et mis ici
-	mat1 := read("mat1new.txt")
-	mat2 := read("mat2.txt") //peut pas utiliser mat2 encore
 
-	result := make([][]int, len(mat1))
-	for i := range result {
-		result[i] = make([]int, len(mat2[0]))
-	}
+	w := bufio.NewWriter(outfile)
 
-	for i := 0; i < len(mat1); i++ { // calc the matrice numbers yes
-		for j := 0; j < len(mat2[0]); j++ {
-			wg.Add(1)
-			go calc(mat1, mat2, result, i, j) // concurrence fait tout seul insh
-			// tableaux modifiés globallement comme java
+	for j := 0; j < len(result); j++ {
+		for i := 0; i < len(result[0]); i++ {
+			_, err23 := w.WriteString(strconv.Itoa(result[i][j]) + " ") // chiffre puis espace
+			if err23 != nil {
+				fmt.Println("arrive pas a convertir strconv")
+			}
+		}
+		_, err24 := w.WriteString("\n") // newline
+		if err24 != nil {
+			fmt.Println("arrive pas a ecrire apres calc")
 		}
 	}
-
-	wg.Wait()
-
-	resultconverted := convert(result) // pas encore fait conversion  !
-
-	outfile.Write(resultconverted)
-	outfile.Close()
-
-	outgoingFile, err := os.Open("result.txt")
-	if err != nil {
-		fmt.Println("aled j'arrive pas a ouvrir un fichier")
-	}
-	defer outgoingFile.Close()
-
-	outfilescan := bufio.NewScanner(outfile)
-	outfilescan.Split(bufio.ScanBytes)
-
-	for outfilescan.Scan() { // retourne vrai tant que ya des trucs à lire donc s'arrete quand plus rien a envoyer niquel
-		c.Write(outfilescan.Bytes())
-	}
+	w.Flush() // apparament il faut ca mais vu qu'on ecrit pas apres peut etre pas
 
 }
 

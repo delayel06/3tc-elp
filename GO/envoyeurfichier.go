@@ -21,6 +21,6 @@ func main() {
 	var _ = file.Close()          //erreur negligée
 	fmt.Println("envoyé: ", data) // test voir ce qu'on a send
 
-	c.Close() //erreur negligée
+	defer c.Close() //erreur negligée// erreurs on fera plus tard
 
 }
