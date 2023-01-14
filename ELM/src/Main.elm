@@ -49,7 +49,7 @@ update msg model =
 
         Pass -> ( { model | wordSubmit = "" } , Cmd.none )
 
-        Tick newTime ->  ({ model | timer = model.timer - 1 } , Cmd.none) 
+        Tick _ ->  ({ model | timer = model.timer - 1 } , Cmd.none) 
  
         GotText result -> case result of
             Ok fullText ->
@@ -68,10 +68,10 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model = div [] [
-      header [style "color" "blue" , style "font-family" "verdana" , style "font-size" "300%"] [ text "Elmphabetic"]
-    , div [ style "font-size" "150%" , style "margin" "8px 20px" ] [ text ("Score : " ++ (String.fromInt model.score))
-             , text ("TimeLeft : " ++ (String.fromInt model.timer))]
-    , div [style "display" "block"] [ 
+      h1 [style "color" "blue" ,  style "margin-left" "50px" , style "font-family" "verdana" , style "font-size" "300%", style "width" "100%", style "align" "center"] [ text "Elmphabetic"]
+    , div [ style "font-size" "150%" , style "margin" "8px 20px" ] [ div [style "float" "left", style "margin-left" "400px" , style "padding" "8px 20px"] [text ("Score : " ++ (String.fromInt model.score))] 
+             , div [style "float" "left",style "padding" "8px 20px"] [text ("TimeLeft : " ++ (String.fromInt model.timer))] ]
+    , div [style "width" "20%" , style "height" "50px"  , style "margin-left" "20px" , style "margin-top" "50px"] [ 
         text """
             Lorem ipsum dolor sit amet. Sit laborum quis ut voluptatem voluptas est nobis velit. Sit possimus nobis non harum natus et ipsa assumenda id voluptas 
             provident in reiciendis autem est odit tempora. Qui reprehenderit obcaecati sed expedita officiis vel delectus voluptas sit voluptatem velit At expedita 
@@ -81,6 +81,6 @@ view model = div [] [
             aperiam et sint tempora. Qui perspiciatis voluptate sit temporibus eaque id neque neque et recusandae quidem non nihil quaerat qui distinctio ipsa qui
             dolor voluptatum! 33 sint corrupti sit suscipit praesentium ut quia cumque.
             """
-        , input [ placeholder "Type your guess here !", value model.wordSubmit, onInput Change] [] ]
-    , div [] [ button [ onClick Submit, style "padding" "15px 32px", style "margin" "8px 20px" ] [ text "Submit"]
-                , button [onClick Pass, style "padding" "15px 32px", style "margin" "8px 20px" ] [ text "Pass" ] ] ]
+        ], div[style "margin-left" "400px"] [div [] [input [ style "font-size" "20px",style "margin-left" "50px",style "margin-top" "180px", placeholder "Type your guess here !", value model.wordSubmit, onInput Change] [] ],div [] [button [ onClick Submit, style "padding" "15px 32px", style "margin-left" "50px" ] [ text "Submit"]
+                , button [onClick Pass,style "margin-top" "30px", style "padding" "15px 32px", style "margin-left" "20px" ] [ text "Pass" ] ] ]]
+
