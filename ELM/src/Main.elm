@@ -32,11 +32,13 @@ type alias Model =
 init : () -> ( Model , Cmd Msg )
 init _ = 
     ( Model "" "" [] 0 180 Loading False
-    , Http.get {
-          url = "https://elm-lang.org/assets/public-opinion.txt"
-        , expect = Http.expectString GotText
-        }
-
+    , Cmd.batch [
+            Http.get {
+                url = "https://elm-lang.org/assets/public-opinion.txt"
+                , expect = Http.expectString GotText
+            }
+            , Random.generate NewWord (Random.int 1 1000)
+        ]
     ) 
 
 
@@ -77,8 +79,8 @@ update msg model =
 checkSubmit : Model -> ( Model , Cmd Msg )
 checkSubmit model =
     if model.wordSubmit == model.wordToGuess
-        then ( { model | score = model.score + 1 , wordSubmit = "" } , Random.generate NewWord (Random.int 1 10) )
-        else ( { model | score = model.score - 1 , wordSubmit = "" } , Random.generate NewWord (Random.int 1 10) )
+        then ( { model | score = model.score + 1 , wordSubmit = "" } , Random.generate NewWord (Random.int 1 1000) )
+        else ( { model | score = model.score - 1 , wordSubmit = "" } , Random.generate NewWord (Random.int 1 1000) )
 
 getElementAtIndex : List a -> Int -> Maybe a
 getElementAtIndex list index =
