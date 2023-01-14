@@ -18,23 +18,23 @@ func main() {
 	data, _ := io.Copy(c, file) //https://pkg.go.dev/io#Copy
 	//data = nombre de bytes envoyé
 
-	defer file.Close()                //erreur negligée
-	fmt.Println("(1) envoyé: ", data) // test voir ce qu'on a send
+	defer file.Close()                        //erreur negligée
+	fmt.Println("(1) Bytes envoyées: ", data) // test voir ce qu'on a send
 
 	file2, _ := os.Open("mat2.txt")
 
 	data2, _ := io.Copy(c, file2) //https://pkg.go.dev/io#Copy
 	//data = nombre de bytes envoyé
 
-	defer file.Close()                 //erreur negligée
-	fmt.Println("(2) envoyé: ", data2) // test voir ce qu'on a send
+	defer file.Close()                         //erreur negligée
+	fmt.Println("(2) Bytes envoyées: ", data2) // test voir ce qu'on a send
 
 	var stockage = make([]byte, 2048)   // gros data jsp quelle taille il faut
 	newdata, erreur := c.Read(stockage) // lis les données et les stock dans stockage
 	if erreur != nil {
-		fmt.Println("Arrive pas a lire data cli")
+		fmt.Println("Je n'arrive pas a lire les données. Les dimensions des matrices ne doivent pas être bonnes.")
 	} else {
-		fmt.Println("(cli) cool jai recu: ", newdata)
+		fmt.Println("(client) Bytes reçues: ", newdata)
 	}
 	fmt.Println(string(stockage[:data]))
 

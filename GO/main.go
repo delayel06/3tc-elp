@@ -40,34 +40,6 @@ func strtointsplice(s string) [][]int {
 
 	return splice
 }
-func read(filename string) [][]int {
-	file, err := os.Open(filename) //on ouvre le fichier qui contient la matrice !!! attention renvoie fichier ET erreur
-	if err != nil {                //gestion de l'erreur pour voir si le fichier existe
-		fmt.Println("erreur ! j'arrive pas a ouvrir la matrice")
-		return nil
-	}
-
-	scanner := bufio.NewScanner(file)
-	var matrice [][]int
-	for scanner.Scan() {
-		temp := strings.Fields(scanner.Text()) //  Fields = split python mais en moins bien ici tout ca pour une boucle classique qui parcourt une ligne
-		var ligne []int
-		for _, i := range temp { //
-			//https://www.educative.io/answers/what-is-the-fields-function-in-go
-			n, err := strconv.Atoi(i) // convert string en entier https://pkg.go.dev/strconvl
-			if err != nil {
-				return nil
-			}
-
-			ligne = append(ligne, n) //ajout nombre a ligne
-		}
-
-		matrice = append(matrice, ligne) //ajout ligne a matrice
-	}
-
-	// Return the matrix
-	return matrice
-}
 
 var wg sync.WaitGroup
 
@@ -89,7 +61,7 @@ func process(mat1 [][]int, mat2 [][]int) [][]int {
 		for j := 0; j < len(mat2[0]); j++ {
 			wg.Add(1)
 			go calc(mat1, mat2, result, i, j) // concurrence fait tout seul insh
-			fmt.Print("fais calc\n")          // test
+			fmt.Print("Calcul matrice..\n")   // test
 			// tableaux modifiés globallement comme java
 		}
 	}
@@ -105,7 +77,7 @@ func tcp(c net.Conn) {
 	if erreur != nil {
 		fmt.Println("Arrive pas a lire data")
 	} else {
-		fmt.Println("(serv 1) cool jai recu: ", data)
+		fmt.Println("(Server - data 1) Bytes reçues: ", data)
 	}
 
 	matreceived := string(stockage[:data])
@@ -116,18 +88,26 @@ func tcp(c net.Conn) {
 	if erreur2 != nil {
 		fmt.Println("Arrive pas a lire data")
 	} else {
-		fmt.Println("(serv 2) cool jai recu: ", data)
+		fmt.Println("(Server - data 2) Bytes reçues: ", data)
 	}
 
 	matreceived2 := string(stockage2[:data2])
-	fmt.Println(matreceived2)
 
-	fmt.Println(strtointsplice(matreceived), "et autre : ", strtointsplice(matreceived2))
-	resulttemp := process(strtointsplice(matreceived), strtointsplice(matreceived2))
+	matrice1 := strtointsplice(matreceived)
+	matrice2 := strtointsplice(matreceived2)
+
+	if len(matrice1[0]) != len(matrice2) {
+		fmt.Println("Error ! Les dimensions des matrices ne sont pas bonnes à multiplier.")
+		c.Close()
+		return
+	}
+
+	fmt.Println("Matrice 1: ", matrice1, "\n", "et 2: ", matrice2)
+	resulttemp := process(matrice1, matrice2)
 	wg.Wait()
 	result := resulttemp
 
-	fmt.Println("result:", result)
+	fmt.Println("Résultat:", result)
 
 	var outfile, errr = os.Create("result.txt")
 	if errr != nil {
@@ -153,7 +133,7 @@ func tcp(c net.Conn) {
 
 	filetosend, _ := os.Open("result.txt")
 	sentdata, _ := io.Copy(c, filetosend)
-	fmt.Print("serv envoyé :", sentdata)
+	fmt.Print("Bytes envoyées: ", sentdata, "\n")
 
 }
 
