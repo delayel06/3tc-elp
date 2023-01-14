@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -13,13 +14,23 @@ import (
 
 func strtointsplice(s string) [][]int {
 	rows := strings.Split(s, "\n")
+	//rows marche
 	var splice [][]int
 	for i := 0; i < len(rows); i++ {
-		cols := strings.Split(rows[i], " ")
+		cols := strings.Split(rows[i], ",")
 		var row []int // creer un truc a ajouter apres
 		for j := 0; j < len(cols); j++ {
 
+			re := regexp.MustCompile(`\r?`)
+			cols[j] = re.ReplaceAllString(cols[j], "")
+			// fuck windows pourquoi ya \r a la fin de tes lignes
+			// ca m'a pris 3h a comprendre ca
+
 			num, _ := strconv.Atoi(cols[j])
+
+			if j == 2 {
+
+			}
 
 			row = append(row, num) // doit append parce que on a pas initializé de taille -> dynamique
 			//on ajout a chaque row le num puis chaque row jusqu'a la fin
@@ -88,21 +99,35 @@ func process(mat1 [][]int, mat2 [][]int) [][]int {
 }
 
 func tcp(c net.Conn) {
-	var stockage = make([]byte, 2048) // gros data jsp quelle taille il faut
-	data, erreur := c.Read(stockage)  // lis les données et les stock dans stockage
+	var stockage = make([]byte, 4096)
+	data, erreur := c.Read(stockage) // lis les données et les stock dans stockage
 
 	if erreur != nil {
 		fmt.Println("Arrive pas a lire data")
 	} else {
-		fmt.Println("(serv) cool raoul jai recu: ", data)
+		fmt.Println("(serv 1) cool jai recu: ", data)
 	}
 
 	matreceived := string(stockage[:data])
 
-	result := process(strtointsplice(matreceived), read("mat2.txt"))
-	fmt.Println(strtointsplice(matreceived), "et autre : ", read("mat2.txt"))
-	fmt.Println("result:", result)
+	var stockage2 = make([]byte, 4096)
+	data2, erreur2 := c.Read(stockage2) // lis les données et les stock dans stockage
+
+	if erreur2 != nil {
+		fmt.Println("Arrive pas a lire data")
+	} else {
+		fmt.Println("(serv 2) cool jai recu: ", data)
+	}
+
+	matreceived2 := string(stockage2[:data2])
+	fmt.Println(matreceived2)
+
+	fmt.Println(strtointsplice(matreceived), "et autre : ", strtointsplice(matreceived2))
+	resulttemp := process(strtointsplice(matreceived), strtointsplice(matreceived2))
 	wg.Wait()
+	result := resulttemp
+
+	fmt.Println("result:", result)
 
 	var outfile, errr = os.Create("result.txt")
 	if errr != nil {
@@ -111,8 +136,8 @@ func tcp(c net.Conn) {
 
 	w := bufio.NewWriter(outfile)
 
-	for j := 0; j < len(result); j++ {
-		for i := 0; i < len(result[0]); i++ {
+	for i := 0; i < len(result); i++ {
+		for j := 0; j < len(result[0]); j++ {
 			_, err23 := w.WriteString(strconv.Itoa(result[i][j]) + " ") // chiffre puis espace
 			if err23 != nil {
 				fmt.Println("arrive pas a convertir strconv")
