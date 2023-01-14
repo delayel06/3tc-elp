@@ -8,6 +8,9 @@ import Http
 import Time
 import Keyboard exposing (RawKey)
 import Random
+import Json.Decode exposing (..)
+import Dict exposing (Dict)
+
 
 -- MAIN
 
@@ -18,6 +21,11 @@ main = Browser.element { init = init , update = update , subscriptions = subscri
 
 type State = Success String | Failure | Loading
 
+type alias Definition = 
+    {
+      def : String
+    }
+
 type alias Model = 
     {
           wordToGuess : String
@@ -26,12 +34,14 @@ type alias Model =
         , score : Int
         , timer : Int
         , httpState : State
+        , jsonState : State
         , focus : Bool
+        , def : Definition
     }
 
 init : () -> ( Model , Cmd Msg )
 init _ = 
-    ( Model "" "" [] 0 180 Loading False
+    ( Model "" "" [] 0 60 Loading Loading False (Definition "")
     , Cmd.batch [
             Http.get {
                 url = "https://elm-lang.org/assets/public-opinion.txt"
@@ -44,7 +54,7 @@ init _ =
 -- UPDATE
 
 type Msg
-    = Change String | Submit | Pass | GotText (Result Http.Error String) | Tick Time.Posix | KeyDown RawKey | Focus | NotFocus | NewWord Int
+    = Change String | Submit | Pass | GotText (Result Http.Error String) |GotJson (Result Http.Error Definition) | Tick Time.Posix | KeyDown RawKey | Focus | NotFocus | NewWord Int
 
 update : Msg -> Model -> ( Model , Cmd Msg )
 update msg model = 
@@ -55,7 +65,7 @@ update msg model =
 
         KeyDown key -> if (Keyboard.anyKeyOriginal key) == Just Keyboard.Enter && model.focus == True then checkSubmit model else (model , Cmd.none)
 
-        Pass -> ( { model | wordSubmit = "" } , Cmd.none )
+        Pass -> ( { model | wordSubmit = "" } , Random.generate NewWord (Random.int 1 1000) )
 
         Tick _ ->  ({ model | timer = model.timer - 1 } , Cmd.none) 
  
@@ -72,7 +82,13 @@ update msg model =
 
         NewWord id -> case (getElementAtIndex model.wordsTable id) of
                                 Nothing -> (model, Cmd.none)
-                                Just x -> ( { model | wordToGuess = x } , Cmd.none )
+                                Just x -> ( { model | wordToGuess = x } , Http.get {url = ("https://api.dictionaryapi.dev/api/v2/entries/en/cat")  , expect = Http.expectJson GotJson defDecoder} )
+
+        GotJson result -> case result of
+                            Ok def -> ({ model | jsonState = Success def.def } , Cmd.none)
+
+                            Err _ -> ({ model | jsonState = Failure } , Cmd.none)
+           
 
 
 checkSubmit : Model -> ( Model , Cmd Msg )
@@ -88,6 +104,12 @@ getElementAtIndex list index =
     else
         List.head (List.drop index list)
 
+defDecoder : Decoder Definition
+defDecoder = 
+    Json.Decode.map Definition (at ["0","meanings","0","definitions","0","definition"] string)
+
+
+
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -99,7 +121,10 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model = case  model.httpState of
-    Success def -> showView model model.wordToGuess
+    Success def -> showView model (case model.jsonState of
+        Success a -> a
+        Loading -> "Loading...."
+        Failure -> "Can't find json")
 
     Loading -> showView model "Loading..."
 
@@ -122,12 +147,17 @@ showView model definition =
             ]
         , div [ style "margin-left" "500px" ] 
             [ div [] 
-                [ input [ style "font-size" "20px",style "margin-left" "50px",style "margin-top" "180px", placeholder "Type your guess here !", value model.wordSubmit, onInput Change, onFocus Focus ,onBlur NotFocus] [] ]
+                [ input [ style "font-size" "20px",style "margin-left" "50px",style "margin-top" "180px", placeholder "Type your guess here !", Html.Attributes.value model.wordSubmit, onInput Change, onFocus Focus ,onBlur NotFocus , disabled (isGameEnded model )] [] ]
             , div [] 
-                [ button [ onClick Submit, style "padding" "15px 32px", style "margin-left" "50px" ]
+                [ button [ onClick Submit, style "padding" "15px 32px", style "margin-left" "50px" , disabled ( isGameEnded model )]
                     [ text "Submit"]
-                , button [onClick Pass,style "margin-top" "30px", style "padding" "15px 32px", style "margin-left" "20px" ] 
+                , button [onClick Pass,style "margin-top" "30px", style "padding" "15px 32px", style "margin-left" "20px" , disabled (isGameEnded model )] 
                     [ text "Pass" ]
                 ]
             ]
+        , div [ style "font-size" "48px" , style "margin" "100px", style "color" "green"]
+            [ text (if isGameEnded model then ( "Bravo !! Votre score est de " ++ String.fromInt model.score ++ ", rechargez la page pour réessayer") else "")]   
         ]
+
+isGameEnded : Model -> Bool
+isGameEnded model = model.timer == 0  
