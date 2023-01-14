@@ -37,7 +37,6 @@ init _ =
                 url = "https://elm-lang.org/assets/public-opinion.txt"
                 , expect = Http.expectString GotText
             }
-            , Random.generate NewWord (Random.int 1 1000)
         ]
     ) 
 
@@ -62,7 +61,7 @@ update msg model =
  
         GotText result -> case result of
             Ok fullText ->
-                ({ model | wordsTable = String.split " " fullText , httpState = Success fullText } , Cmd.none)
+                ({ model | wordsTable = String.split " " fullText , httpState = Success fullText } , Random.generate NewWord (Random.int 1 1000))
 
             Err _ ->
                 ({ model | httpState = Failure } , Cmd.none)
