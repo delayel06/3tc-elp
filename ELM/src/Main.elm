@@ -9,6 +9,7 @@ import Time
 import Keyboard exposing (RawKey)
 import Random
 
+
 -- MAIN
 
 main = Browser.element { init = init , update = update , subscriptions = subscriptions , view = view }
@@ -31,7 +32,7 @@ type alias Model =
 
 init : () -> ( Model , Cmd Msg )
 init _ = 
-    ( Model "" "" [] 0 180 Loading False
+    ( Model "" "" [] 0 60 Loading False
     , Cmd.batch [
             Http.get {
                 url = "https://elm-lang.org/assets/public-opinion.txt"
@@ -55,7 +56,7 @@ update msg model =
 
         KeyDown key -> if (Keyboard.anyKeyOriginal key) == Just Keyboard.Enter && model.focus == True then checkSubmit model else (model , Cmd.none)
 
-        Pass -> ( { model | wordSubmit = "" } , Cmd.none )
+        Pass -> ( { model | wordSubmit = "" } , Random.generate NewWord (Random.int 1 1000) )
 
         Tick _ ->  ({ model | timer = model.timer - 1 } , Cmd.none) 
  
@@ -87,6 +88,9 @@ getElementAtIndex list index =
         Nothing
     else
         List.head (List.drop index list)
+
+
+
 
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
@@ -122,12 +126,17 @@ showView model definition =
             ]
         , div [ style "margin-left" "500px" ] 
             [ div [] 
-                [ input [ style "font-size" "20px",style "margin-left" "50px",style "margin-top" "180px", placeholder "Type your guess here !", value model.wordSubmit, onInput Change, onFocus Focus ,onBlur NotFocus] [] ]
+                [ input [ style "font-size" "20px",style "margin-left" "50px",style "margin-top" "180px", placeholder "Type your guess here !", value model.wordSubmit, onInput Change, onFocus Focus ,onBlur NotFocus , disabled (isGameEnded model )] [] ]
             , div [] 
-                [ button [ onClick Submit, style "padding" "15px 32px", style "margin-left" "50px" ]
+                [ button [ onClick Submit, style "padding" "15px 32px", style "margin-left" "50px" , disabled ( isGameEnded model )]
                     [ text "Submit"]
-                , button [onClick Pass,style "margin-top" "30px", style "padding" "15px 32px", style "margin-left" "20px" ] 
+                , button [onClick Pass,style "margin-top" "30px", style "padding" "15px 32px", style "margin-left" "20px" , disabled (isGameEnded model )] 
                     [ text "Pass" ]
                 ]
             ]
+        , div [ style "font-size" "48px" , style "margin" "100px", style "color" "green"]
+            [ text (if isGameEnded model then ( "Bravo !! Votre score est de " ++ String.fromInt model.score ++ ", rechargez la page pour réessayer") else "")]   
         ]
+
+isGameEnded : Model -> Bool
+isGameEnded model = model.timer == 0  
