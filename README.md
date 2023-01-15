@@ -18,6 +18,15 @@ keep --
 
 ## GO : Matrix multiplication
 
+```mermaid
+graph LR
+A[Client] -- Envoie les données de 2 fichiers texte matrice à travers tcp --> B((Serveur))
+B -- Initialise calcul matrices --> C((Go Routine))
+C -- Renvoie résultat --> B
+B -- Renvoie données de la matrice résultat --> A
+
+```
+
 Dans le directory, compilation avec:
 ```sh
 go run ./main.go
