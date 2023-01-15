@@ -22,7 +22,7 @@ main = Browser.element { init = init , update = update , subscriptions = subscri
 
 init : () -> ( Model , Cmd Msg )
 init _ = 
-    ( Model "" "" [] 0 60 Loading Loading False
+    ( Model "" "" [] 0 60 Loading Loading False []
     , Cmd.batch [
             Http.get {
                 url = "https://elm-lang.org/assets/public-opinion.txt"
@@ -64,7 +64,7 @@ update msg model =
                                 Just x -> ( { model | wordToGuess = x } , Http.get {url = ("https://api.dictionaryapi.dev/api/v2/entries/en/cat")  , expect = Http.expectJson GotJson descriptionDecoder} )
 
         GotJson result -> case result of
-                            Ok desc -> ({ model | jsonState = Success "Ok" } , Cmd.none)
+                            Ok desc -> ({ model | jsonState = Success "Ok" , description = desc} , Cmd.none)
 
                             Err _ -> ({ model | jsonState = Utils.Failure } , Cmd.none)
            
@@ -82,11 +82,26 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model = case  model.httpState of
-    Utils.Success def -> showView model (case model.jsonState of
-        Utils.Success a -> model.wordToGuess
-        Utils.Loading -> "Loading...."
-        Utils.Failure -> "Can't find json")
+    Utils.Success desc -> showView model (
+        case model.jsonState of
+            Utils.Success a -> displayDesc model.description
 
-    Utils.Loading -> showView model "Loading..."
+            Utils.Loading -> [text "Loading...."]
 
-    Utils.Failure -> showView model "Can't access the page"
+            Utils.Failure -> [text "Can't find json"])
+
+    Utils.Loading -> showView model [text "Loading..."]
+
+    Utils.Failure -> showView model [text "Can't access the page"]
+
+{-
+
+Utils.Success a -> case (getElementAtIndex model.description 1) of
+                Nothing -> "erreur.."
+                Just x -> case (getElementAtIndex x.meanings 0) of
+                    Nothing -> "Something went wrong.."
+                    Just y -> case (getElementAtIndex y.definitions 2) of
+                        Nothing -> "Something went wrong..."
+                        Just k -> k.definition
+
+-}

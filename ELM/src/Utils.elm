@@ -7,11 +7,25 @@ import Http
 import Time
 import Keyboard exposing (RawKey)
 import Random
-import Json.Decode exposing (..)
-import JsonUtils exposing (..)
 
 
--- MODEL
+-- TYPES
+
+type alias Description = List Welcome
+
+type alias Welcome =
+    { word : String
+    , meanings : List Meaning
+    }
+
+type alias Meaning =
+    { partOfSpeech : String
+    , definitions : List Definition
+    }
+
+type alias Definition =
+    { definition : String
+    }
 
 type State = Success String | Failure | Loading
 
@@ -25,6 +39,7 @@ type alias Model =
         , httpState : State
         , jsonState : State
         , focus : Bool
+        , description : Description
     }
 
 
@@ -54,7 +69,7 @@ isGameEnded model = model.timer == 0
 
 -- HTML DISPLAY
 
-showView : Model -> String -> Html Msg
+showView : Model -> List (Html Msg) -> Html Msg
 showView model definition = 
     div [] 
         [
@@ -65,10 +80,7 @@ showView model definition =
                  [text ("Score : " ++ (String.fromInt model.score))] 
             , div [style "float" "left",style "padding" "8px 20px"]
                  [text ("TimeLeft : " ++ (String.fromInt model.timer))] ]
-        , div [style "width" "25%" , style "height" "50px"  , style "margin-left" "20px" , style "margin-top" "80px", style "font-size" "18px"] 
-            [ 
-            text definition
-            ]
+        , div [style "width" "25%" , style "height" "50px"  , style "margin-left" "20px" , style "margin-top" "80px", style "font-size" "18px"] [ul [] definition]
         , div [ style "margin-left" "500px" ] 
             [ div [] 
                 [ input [ style "font-size" "20px",style "margin-left" "50px",style "margin-top" "180px", placeholder "Type your guess here !", Html.Attributes.value model.wordSubmit, onInput Change, onFocus Focus ,onBlur NotFocus , disabled (isGameEnded model )] [] ]
