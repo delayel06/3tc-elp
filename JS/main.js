@@ -8,7 +8,9 @@ import chalk from 'chalk';
 import fs from 'fs';
 
 // variables
+var cmdhistorytab = [];
 var running = true;
+var lastcommand = null;
 var mainpath = process.cwd();
 const actions = [
     { // La je fais un fonction dans l'array pour avoir des types
@@ -37,7 +39,11 @@ const actions = [
     },
     {
         name: 'exit',
-        desc: 'exit the CLI. Shift+P also works'
+        desc: 'exit the CLI. Ctrl+P also works'
+    },
+    {
+        name: 'history',
+        desc: 'Shows previous commands'
     }
     ]
 
@@ -52,7 +58,7 @@ const run = async () => {
     exitCommand();
     mainpath = process.cwd();
     const cmd = await line();
-    //console.log(com["command"]);
+    cmdhistorytab.push(cmd); // history of commands
     await action(cmd);
 }
 
@@ -63,6 +69,7 @@ function line() {
                 name: 'command',
                 type: 'input',
                 message: chalk.blue(mainpath + ' $ ')
+
             }
         ]);
 }
@@ -181,7 +188,7 @@ async function action (cmd) {
     else if (cmd.command === 'help'){
 
         for(let i = 0 ; i < actions.length ; i++){
-            console.log(chalk.whiteBright(actions[i].name + " -- " + actions[i].desc));
+            console.log(chalk.whiteBright(actions[i].name) + " -- " + chalk.magenta(actions[i].desc));
         }
     }
 
@@ -227,11 +234,18 @@ async function action (cmd) {
         });
     }
 
+    else if(cmd.command === "history") {
+
+        for(let i = 0; i < cmdhistorytab.length; i++){
+            console.log(chalk.yellow(i+1)+'. '+ cmdhistorytab[i].command +"\n");
+        }
+    }
+
     else {console.log("Unrecognized command:" + cmd.command)}
 }
 
 function exitCommand(){
-    const stdin = process.stdin;
+    var stdin = process.stdin;
 
     stdin.setRawMode(true);
     stdin.resume();
@@ -246,6 +260,8 @@ function exitCommand(){
         }
     });
 }
+
+
 
 
 //fonction pour trier les list processes par celui qui a le plus de mémoire comme ca on voit pas
