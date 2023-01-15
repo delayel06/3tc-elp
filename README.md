@@ -1,10 +1,18 @@
+
 # ELP
-3TC-ELP Lilian Delaye &amp; Jean Peaurroy
+3TC-ELP **Lilian Delaye** &amp; **Jean Peaurroy**
 
 
 ## Javascript - CLI
+Ligne de commande dans le terminal qui permet de faire diverses fonctions.
+
+Exécution avec:
 ```sh
-Commandes possibles :
+node ./main.js
+```
+
+Liste des commandes:
+```sh
 lp -- lists the running processes on the machine
 clear -- clears the console
 exec (path-to-program) -- runs a program from PATH variables or direct path
@@ -17,6 +25,8 @@ keep --
 ```
 
 ## GO : Matrix multiplication
+
+Serveur et client qui calculent le produit d'une matrice en exécutant des taches en concurrence
 
 ```mermaid
 graph LR
@@ -31,9 +41,14 @@ Dans le directory, compilation avec:
 ```sh
 go run ./main.go
 ```
+
 Puis:
+
 ```sh
 go run ./envoyeurfichier.go
 ```
 
 ## ELM
+Application web monopage qui contient un jeu ou il faut utiliser les définitions données pour trouver un mot.
+
+**Database**: [https://dictionaryapi.dev/](https://dictionaryapi.dev/)
