@@ -80,7 +80,7 @@ showView model definition =
                  [text ("Score : " ++ (String.fromInt model.score))] 
             , div [style "float" "left",style "padding" "8px 20px", style "font-size" "32px"]
                  [text ("TimeLeft : " ++ (String.fromInt model.timer))] ]
-        , div [style "width" "25%" , style "height" "50px"  , style "margin-left" "20px" , style "margin-top" "80px", style "font-size" "18px"] [ul [] definition]
+        , div [style "width" "25%" , style "height" "50px"  , style "margin-left" "20px" , style "margin-top" "40px", style "font-size" "18px"] [ul [] definition]
         , div [ style "margin-left" "700px" ] 
             [ div [] 
                 [ input [ style "padding-left" "40px",style "padding-top" "20px",style "padding-bottom" "20px", style "font-size" "20px",style "margin-left" "50px",style "margin-top" "180px", placeholder "Type your guess here !", Html.Attributes.value model.wordSubmit, onInput Change, onFocus Focus ,onBlur NotFocus , disabled (isGameEnded model )] [] ]
@@ -93,6 +93,7 @@ showView model definition =
             ]
         , div [ style "font-size" "48px" , style "margin-left" "700px", style "margin-top" "300px", style "color" "green"]
             [ text (if isGameEnded model then ( "Bravo !! Votre score est de " ++ String.fromInt model.score ++ ", rechargez la page pour réessayer") else "")]   
+        
         ]
 
 displayDesc : Description -> List ( Html Msg )

@@ -22,10 +22,10 @@ main = Browser.element { init = init , update = update , subscriptions = subscri
 
 init : () -> ( Model , Cmd Msg )
 init _ = 
-    ( Model "" "" [] 0 60 Loading Loading False []
+    ( Model "" "" [] 0 120 Loading Loading False []
     , Cmd.batch [
             Http.get {
-                url = "https://elm-lang.org/assets/public-opinion.txt"
+                url = "http://localhost:8000/thousand_words_things_explainer.txt"
                 , expect = Http.expectString GotText
             }
         ]
@@ -33,7 +33,6 @@ init _ =
 
 
 -- UPDATE
-
 
 update : Msg -> Model -> ( Model , Cmd Msg )
 update msg model = 
@@ -61,7 +60,7 @@ update msg model =
 
         NewWord id -> case (getElementAtIndex model.wordsTable id) of
                                 Nothing -> (model, Cmd.none)
-                                Just x -> ( { model | wordToGuess = x } , Http.get {url = ("https://api.dictionaryapi.dev/api/v2/entries/en/cat")  , expect = Http.expectJson GotJson descriptionDecoder} )
+                                Just x -> ( { model | wordToGuess = x } , Http.get {url = ("https://api.dictionaryapi.dev/api/v2/entries/en/" ++ x)  , expect = Http.expectJson GotJson descriptionDecoder} )
 
         GotJson result -> case result of
                             Ok desc -> ({ model | jsonState = Success "Ok" , description = desc} , Cmd.none)
@@ -86,7 +85,7 @@ view model = case  model.httpState of
         case model.jsonState of
             Utils.Success a -> displayDesc model.description
 
-            Utils.Loading -> [text "Loading...."]
+            Utils.Loading -> [text "Loading"]
 
             Utils.Failure -> [text "Can't find json"])
 
