@@ -30,8 +30,8 @@ Serveur et client qui calculent le produit d'une matrice en exécutant des tache
 
 ```mermaid
 graph LR
-A[Client] -- Envoie les données de 2 fichiers texte matrice à travers tcp --> B((Serveur))
-B -- Initialise calcul matrices --> C((Go Routine))
+A[Client] -- Envoie les données de 2 fichiers texte matrice à travers tcp --> B[Serveur]
+B -- Initialise calcul matrices --> C[Go Routine]
 C -- Renvoie résultat --> B
 B -- Renvoie données de la matrice résultat --> A
 
