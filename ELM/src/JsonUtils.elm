@@ -27,19 +27,5 @@ definitionDecoder =
     Json.Decode.map Definition 
         (field "definition" string)
 
-displayDesc : Description -> List ( Html Msg )
-displayDesc list = case list of
-    [] -> []
-    (x::xs) -> [li [] ([text "Meaning"] ++ [ul [] (displayMeanings x.meanings)])] ++ (displayDesc xs) 
-
-displayMeanings : List Meaning -> List (Html Msg)
-displayMeanings list = case list of
-    [] -> []
-    (x::xs) -> [li [] [text x.partOfSpeech]] ++ [ol [] (displayDefinitions x.definitions)] ++ (displayMeanings xs)
-
-displayDefinitions : List Definition -> List (Html Msg)
-displayDefinitions list = case list of
-    [] -> []
-    (x::xs) -> [li [] [text x.definition]] ++ (displayDefinitions xs)
 
    

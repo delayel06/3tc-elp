@@ -93,15 +93,3 @@ view model = case  model.httpState of
     Utils.Loading -> showView model [text "Loading..."]
 
     Utils.Failure -> showView model [text "Can't access the page"]
-
-{-
-
-Utils.Success a -> case (getElementAtIndex model.description 1) of
-                Nothing -> "erreur.."
-                Just x -> case (getElementAtIndex x.meanings 0) of
-                    Nothing -> "Something went wrong.."
-                    Just y -> case (getElementAtIndex y.definitions 2) of
-                        Nothing -> "Something went wrong..."
-                        Just k -> k.definition
-
--}
