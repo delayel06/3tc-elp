@@ -46,6 +46,14 @@ const actions = [
     {
         name: 'history',
         desc: 'Shows previous commands'
+    },
+    {
+        name: 'keep <process id>',
+        desc: 'Detaches process id from CLI'
+    },
+    {
+        name: '<process id> !',
+        desc: 'Launches program, in background.'
     }
     ]
 
@@ -199,31 +207,22 @@ async function action (cmd) {
         running = false;
     }
 
-    else if (/^!/.test(cmd.command)) {
+    else if (/!/.test(cmd.command)) {
         var prog;
         if(process.platform === 'win32'){
-            prog = 'start /min ' + cmd.command.replace(/^!/, "");
+            prog = 'start /B ' + cmd.command.replace("!", "");
         } else {
-            prog = cmd.command.replace(/^!/, "") + '&';
+            prog = cmd.command.replace("!", "&") ;
         }
+        exec(prog, (err, stdout, stderr) => {
+            if (err) {
+                console.log("arrive pas a ouvrir");
 
-        const child = await cp.exec(prog, { detached: true, stdio: 'ignore'}, async (error) => {
-            if (error) {
-                await console.error(`exec error: ${error}`);
+            }else{
+                console.log("J'ai ouvert "+prog);
             }
         });
-        child.unref();
-        child.stdout.on('data', data => {
-            console.log(`stdout: ${data}`);
-        });
 
-        child.stderr.on('data', data => {
-            console.error(`stderr: ${data}`);
-        });
-
-        child.on('close', code => {
-            console.log(`child process exited with code ${code}`);
-        });
 
     }
 
@@ -231,7 +230,7 @@ async function action (cmd) {
         //garder prog
         let processId = cmd.command.replace(/^keep /, "");
         if(process.platform === 'win32'){
-            cp(`start /B ${processId}`, (err, stdout, stderr) => {
+            exec(`start /B ${processId}`, (err, stdout, stderr) => {
 
                 console.log(stdout);
             });
