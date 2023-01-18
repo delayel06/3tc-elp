@@ -2,10 +2,12 @@ import inq from 'inquirer';
 import boxen from 'boxen';
 import psList from 'ps-list';
 import cp from 'child_process';
+import { exec } from 'child_process'
 import * as process from "process";
 import { suspend, resume } from 'ntsuspend';
 import chalk from 'chalk';
 import fs from 'fs';
+
 
 // variables
 var cmdhistorytab = [];
@@ -226,12 +228,23 @@ async function action (cmd) {
     }
 
     else if(/^keep /.test(cmd.command)) {
+        //garder prog
         let processId = cmd.command.replace(/^keep /, "");
-        cp.exec(`nohup kill -CONT ${processId} > /dev/null 2>&1 &`, (error) => {
-            if (error) {
-                console.error(`exec error: ${error}`);
-            }
-        });
+        if(process.platform === 'win32'){
+            cp(`start /B ${processId}`, (err, stdout, stderr) => {
+
+                console.log(stdout);
+            });
+        } else {
+
+            exec(`nohup disown ${processId}`, (err, stdout, stderr) => {
+
+                console.log(stdout);
+            });
+
+        }
+
+
     }
 
     else if(cmd.command === "history") {
