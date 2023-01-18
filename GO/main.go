@@ -17,7 +17,7 @@ func strtointsplice(s string) [][]int {
 	//rows marche
 	var splice [][]int
 	for i := 0; i < len(rows); i++ {
-		cols := strings.Split(rows[i], ",")
+		cols := strings.Split(rows[i], " ")
 		var row []int // creer un truc a ajouter apres
 		for j := 0; j < len(cols); j++ {
 
