@@ -23,7 +23,7 @@ func strtointsplice(s string) [][]int {
 
 			re := regexp.MustCompile(`\r?`)
 			cols[j] = re.ReplaceAllString(cols[j], "")
-			// fuck windows pourquoi ya \r a la fin de tes lignes
+			// windows pourquoi ya \r a la fin de tes lignes
 			// ca m'a pris 3h a comprendre ca
 
 			num, _ := strconv.Atoi(cols[j])
@@ -129,10 +129,17 @@ func tcp(c net.Conn) {
 		}
 	}
 
-	w.Flush() // apparament il faut ca mais vu qu'on ecrit pas apres peut etre pas
+	w.Flush()
 
 	filetosend, _ := os.Open("result.txt")
 	sentdata, _ := io.Copy(c, filetosend)
+
+	fi, _ := filetosend.Stat()
+	if sentdata != fi.Size() {
+		fmt.Println("Erreur ! Je n'ai pas envoyé le bon nombre de bytes.")
+		return
+	}
+
 	fmt.Print("Bytes envoyées: ", sentdata, "\n")
 
 }
