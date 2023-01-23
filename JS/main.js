@@ -47,8 +47,8 @@ const actions = [
         desc: 'Shows previous commands'
     },
     {
-        name: 'keep <process id>',
-        desc: 'Detaches process id from CLI'
+        name: 'keep <process name>',
+        desc: 'launches a process detached from the cli'
     },
     {
         name: '<process id> !',
@@ -227,15 +227,15 @@ async function action (cmd) {
 
     else if(/^keep /.test(cmd.command)) {
         //garder prog
-        let processId = cmd.command.replace(/^keep /, "");
+        let name = cmd.command.replace(/^keep /, "");
         if(process.platform === 'win32'){
-            exec(`start /B ${processId}`, (err, stdout, stderr) => {
+            exec(`start /B ${name}`, (err, stdout, stderr) => {
 
                 console.log(stdout);
             });
         } else {
 
-            exec(`disown ${processId}`, (err, stdout, stderr) => {
+            exec(`nohup ${name}`, (err, stdout, stderr) => {
 
                 console.log(stdout);
             });
