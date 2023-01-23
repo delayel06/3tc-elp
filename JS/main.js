@@ -24,11 +24,11 @@ const actions = [
         desc: 'clears the console'
     },
     {
-        name: 'exec (path-to-program)',
+        name: 'exec <path-to-program>',
         desc: 'runs a program from PATH variables or direct path'
     },
     {
-        name: 'bing (-k|-p|-c) (process_id)',
+        name: 'bing (-k|-p|-c) <process_id>',
         desc: "-k kills select process -p pauses and -c resumes"
     },
     {
@@ -36,7 +36,7 @@ const actions = [
         desc: 'displays the files and folders in the current directory'
     },
     {
-        name: 'cd (directory)',
+        name: 'cd <directory>',
         desc: 'navigate through directories'
     },
     {
