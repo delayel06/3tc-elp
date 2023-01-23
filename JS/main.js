@@ -72,7 +72,7 @@ const run = async () => {
 }
 
 function line() {
-    return inq.prompt(
+    return inq.prompt( // renvoit une Promise
         [
             {
                 name: 'command',
