@@ -4,7 +4,6 @@ import psList from 'ps-list';
 import cp from 'child_process';
 import { exec } from 'child_process'
 import * as process from "process";
-import { suspend, resume } from 'ntsuspend';
 import chalk from 'chalk';
 import fs from 'fs';
 
@@ -139,7 +138,7 @@ async function action (cmd) {
                         // Pause the process
                         console.log("Process paused: " + processId);
                         if (process.platform === 'win32') {
-                            suspend(processId);
+                            //coup dur tu es sous windows
                         }else{
                             try {
                                 process.kill(processId, 'SIGSTOP');
@@ -236,7 +235,7 @@ async function action (cmd) {
             });
         } else {
 
-            exec(`nohup disown ${processId}`, (err, stdout, stderr) => {
+            exec(`disown ${processId}`, (err, stdout, stderr) => {
 
                 console.log(stdout);
             });
