@@ -21,7 +21,7 @@ dir -- displays the files and folders in the current directory
 cd (directory) -- navigate through directories
 exit -- exit the CLI. Ctrl+P also works
 history -- Shows previous commands
-keep <process id> -- Detaches process id from CLI
+keep <process name> -- Launches a process detached from CLI
 <process id> ! -- Launches program, in background.
 
 ```
