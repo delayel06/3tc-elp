@@ -46,14 +46,14 @@ func main() {
 	} else {
 		fmt.Println("(client) Bytes reçues: ", newdata)
 	}
-	fmt.Println(string(stockage[:data]))
+	fmt.Println(string(stockage[:newdata]))
 
 	file, err := os.Create("result.txt")
 	if err != nil {
 		fmt.Print("arrive pas a creer fichier")
 	}
 
-	file.Write(stockage[:data])
+	file.Write(stockage[:newdata])
 	defer file.Close()
 
 	defer c.Close()

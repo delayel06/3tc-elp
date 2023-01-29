@@ -17,7 +17,7 @@ func strtointsplice(s string) [][]int {
 	//rows marche
 	var splice [][]int
 	for i := 0; i < len(rows); i++ {
-		cols := strings.Split(rows[i], " ")
+		cols := strings.Split(rows[i], ",")
 		var row []int // creer un truc a ajouter apres
 		for j := 0; j < len(cols); j++ {
 
@@ -28,9 +28,7 @@ func strtointsplice(s string) [][]int {
 
 			num, _ := strconv.Atoi(cols[j])
 
-			if j == 2 {
-
-			}
+		
 
 			row = append(row, num) // doit append parce que on a pas initializé de taille -> dynamique
 			//on ajout a chaque row le num puis chaque row jusqu'a la fin
