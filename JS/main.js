@@ -6,6 +6,10 @@ import { exec } from 'child_process'
 import * as process from "process";
 import chalk from 'chalk';
 import fs from 'fs';
+import EventEmitter from 'events';
+
+
+
 
 
 // variables
@@ -57,6 +61,9 @@ const actions = [
     ]
 
 // initiale clear + intro
+class MyEmitter extends EventEmitter {}
+const myEmitter = new MyEmitter();
+myEmitter.setMaxListeners(30);
 console.clear();
 console.log(chalk.yellow(boxen('Shell TC v1.3', {padding: 1})));
 console.log(chalk.green("Run 'help' to see available commands "));
