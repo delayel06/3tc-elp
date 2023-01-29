@@ -54,7 +54,7 @@ checkSubmit : Model -> ( Model , Cmd Msg )
 checkSubmit model =
     if model.wordSubmit == model.wordToGuess
         then ( { model | score = model.score + 1 , wordSubmit = "" } , Random.generate NewWord (Random.int 1 1000) )
-        else ( { model | score = model.score - 1 , wordSubmit = "" } , Random.generate NewWord (Random.int 1 1000) )
+        else ( { model | wordSubmit = "" } , Random.generate NewWord (Random.int 1 1000) )
 
 getElementAtIndex : List a -> Int -> Maybe a
 getElementAtIndex list index =
