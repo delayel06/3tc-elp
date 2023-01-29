@@ -7,6 +7,11 @@
 Ligne de commande dans le terminal qui permet de faire diverses fonctions.
 
 Exécution avec:
+
+```sh
+npm install
+```
+puis
 ```sh
 node ./main.js
 ```
