@@ -7,6 +7,11 @@
 Ligne de commande dans le terminal qui permet de faire diverses fonctions.
 
 Exécution avec:
+
+```sh
+npm install
+```
+puis
 ```sh
 node ./main.js
 ```
@@ -19,9 +24,11 @@ exec (path-to-program) -- runs a program from PATH variables or direct path
 bing (-k|-p|-c) (process_id) -- -k kills select process -p pauses and -c resumes
 dir -- displays the files and folders in the current directory
 cd (directory) -- navigate through directories
-exit -- exit the CLI. Shift+P also works
-keep --
-! --
+exit -- exit the CLI. Ctrl+P also works
+history -- Shows previous commands
+keep <process name> -- Launches a process detached from CLI
+<process id> ! -- Launches program, in background.
+
 ```
 
 ## GO : Matrix multiplication
@@ -52,3 +59,9 @@ go run ./envoyeurfichier.go
 Application web monopage qui contient un jeu ou il faut utiliser les définitions données pour trouver un mot.
 
 **Database**: [https://dictionaryapi.dev/](https://dictionaryapi.dev/)
+
+Launch with
+```sh
+elm reactor
+```
+then go to the specified address

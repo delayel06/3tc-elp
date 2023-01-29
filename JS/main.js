@@ -2,10 +2,15 @@ import inq from 'inquirer';
 import boxen from 'boxen';
 import psList from 'ps-list';
 import cp from 'child_process';
+import { exec } from 'child_process'
 import * as process from "process";
-import { suspend, resume } from 'ntsuspend';
 import chalk from 'chalk';
 import fs from 'fs';
+import EventEmitter from 'events';
+
+
+
+
 
 // variables
 var cmdhistorytab = [];
@@ -22,11 +27,11 @@ const actions = [
         desc: 'clears the console'
     },
     {
-        name: 'exec (path-to-program)',
+        name: 'exec <path-to-program>',
         desc: 'runs a program from PATH variables or direct path'
     },
     {
-        name: 'bing (-k|-p|-c) (process_id)',
+        name: 'bing (-k|-p|-c) <process_id>',
         desc: "-k kills select process -p pauses and -c resumes"
     },
     {
@@ -34,7 +39,7 @@ const actions = [
         desc: 'displays the files and folders in the current directory'
     },
     {
-        name: 'cd (directory)',
+        name: 'cd <directory>',
         desc: 'navigate through directories'
     },
     {
@@ -44,10 +49,21 @@ const actions = [
     {
         name: 'history',
         desc: 'Shows previous commands'
+    },
+    {
+        name: 'keep <process name>',
+        desc: 'launches a process detached from the cli'
+    },
+    {
+        name: '<process id> !',
+        desc: 'Launches program, in background.'
     }
     ]
 
 // initiale clear + intro
+class MyEmitter extends EventEmitter {}
+const myEmitter = new MyEmitter();
+myEmitter.setMaxListeners(30);
 console.clear();
 console.log(chalk.yellow(boxen('Shell TC v1.3', {padding: 1})));
 console.log(chalk.green("Run 'help' to see available commands "));
@@ -63,7 +79,7 @@ const run = async () => {
 }
 
 function line() {
-    return inq.prompt(
+    return inq.prompt( // renvoit une Promise
         [
             {
                 name: 'command',
@@ -129,7 +145,7 @@ async function action (cmd) {
                         // Pause the process
                         console.log("Process paused: " + processId);
                         if (process.platform === 'win32') {
-                            suspend(processId);
+                            //coup dur tu es sous windows
                         }else{
                             try {
                                 process.kill(processId, 'SIGSTOP');
@@ -197,41 +213,43 @@ async function action (cmd) {
         running = false;
     }
 
-    else if (/^!/.test(cmd.command)) {
+    else if (/!/.test(cmd.command)) {
         var prog;
         if(process.platform === 'win32'){
-            prog = 'start /min ' + cmd.command.replace(/^!/, "");
+            prog = 'start /B ' + cmd.command.replace("!", "");
         } else {
-            prog = cmd.command.replace(/^!/, "") + '&';
+            prog = cmd.command.replace("!", "&") ;
         }
+        exec(prog, (err, stdout, stderr) => {
+            if (err) {
+                console.log("arrive pas a ouvrir");
 
-        const child = await cp.exec(prog, { detached: true, stdio: 'ignore'}, async (error) => {
-            if (error) {
-                await console.error(`exec error: ${error}`);
+            }else{
+                console.log("J'ai ouvert "+prog);
             }
         });
-        child.unref();
-        child.stdout.on('data', data => {
-            console.log(`stdout: ${data}`);
-        });
 
-        child.stderr.on('data', data => {
-            console.error(`stderr: ${data}`);
-        });
-
-        child.on('close', code => {
-            console.log(`child process exited with code ${code}`);
-        });
 
     }
 
     else if(/^keep /.test(cmd.command)) {
-        let processId = cmd.command.replace(/^keep /, "");
-        cp.exec(`nohup kill -CONT ${processId} > /dev/null 2>&1 &`, (error) => {
-            if (error) {
-                console.error(`exec error: ${error}`);
-            }
-        });
+        //garder prog
+        let name = cmd.command.replace(/^keep /, "");
+        if(process.platform === 'win32'){
+            exec(`start /B ${name}`, (err, stdout, stderr) => {
+
+                console.log(stdout);
+            });
+        } else {
+
+            exec(`nohup ${name}`, (err, stdout, stderr) => {
+
+                console.log(stdout);
+            });
+
+        }
+
+
     }
 
     else if(cmd.command === "history") {
