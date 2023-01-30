@@ -36,25 +36,37 @@ func main() {
 		return
 	}
 
-	defer file.Close()
+	defer file2.Close()
 	fmt.Println("(2) Bytes envoyées: ", data2) // test voir ce qu'on a send
 
-	var stockage = make([]byte, 2048)
-	newdata, erreur := c.Read(stockage) // lis les données et les stock dans stockage
-	if erreur != nil {
-		fmt.Println("Je n'arrive pas a lire les données. Les dimensions des matrices ne doivent pas être bonnes.")
-	} else {
-		fmt.Println("(client) Bytes reçues: ", newdata)
-	}
-	fmt.Println(string(stockage[:newdata]))
+	
+	receivedData := make([]byte, 2048)
 
-	file, err := os.Create("result.txt")
+	number, err := c.Read(receivedData)
+
 	if err != nil {
-		fmt.Print("arrive pas a creer fichier")
+	  fmt.Println("Error reading data:", err)
+	  return
 	}
 
-	file.Write(stockage[:newdata])
-	defer file.Close()
+	file3, err := os.Create("result.txt")
+	if err != nil {
+	  fmt.Println("Error creating file:", err)
+	  return
+	}
+	defer file3.Close()
+
+	_, err = file3.Write(receivedData[:number])
+	if err != nil {
+	  fmt.Println("Error writing to file:", err)
+	  return
+	}
+
+	fmt.Println("Data written to file")
+
+
+
+
 
 	defer c.Close()
 }
