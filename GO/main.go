@@ -116,7 +116,7 @@ func tcp(c net.Conn) {
 
 	for i := 0; i < len(result); i++ {
 		for j := 0; j < len(result[0]); j++ {
-			_, err23 := w.WriteString(strconv.Itoa(result[i][j]) + " ") // chiffre puis espace
+			_, err23 := w.WriteString(strconv.Itoa(result[i][j]) + ",") // chiffre puis espace
 			if err23 != nil {
 				fmt.Println("arrive pas a convertir strconv")
 			}
