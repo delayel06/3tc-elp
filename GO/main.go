@@ -1,15 +1,16 @@
 package main
 
 import (
-	"bufio"
+	
 	"fmt"
-	"io"
+	
 	"net"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
+	
 )
 
 func strtointsplice(s string) [][]int {
@@ -38,6 +39,19 @@ func strtointsplice(s string) [][]int {
 
 	return splice
 }
+
+func intsplicetostr(a [][]int ) string {
+	var s string
+	for _, row := range a {
+		for _, item := range row {
+			s += strconv.Itoa(item) + ","
+		}
+		s = s[:len(s)-1] + "\n"
+	}
+	return s
+	
+}
+
 
 var wg sync.WaitGroup
 
@@ -80,7 +94,7 @@ func tcp(c net.Conn) {
 
 	matreceived := string(stockage[:data])
 
-	var stockage2 = make([]byte, 4096)
+	var stockage2 = make([]byte, 2048)
 	data2, erreur2 := c.Read(stockage2) // lis les données et les stock dans stockage
 
 	if erreur2 != nil {
@@ -107,38 +121,15 @@ func tcp(c net.Conn) {
 
 	fmt.Println("Résultat:", result)
 
-	var outfile, errr = os.Create("result.txt")
-	if errr != nil {
-		return
-	}
 
-	w := bufio.NewWriter(outfile)
 
-	for i := 0; i < len(result); i++ {
-		for j := 0; j < len(result[0]); j++ {
-			_, err23 := w.WriteString(strconv.Itoa(result[i][j]) + ",") // chiffre puis espace
-			if err23 != nil {
-				fmt.Println("arrive pas a convertir strconv")
-			}
-		}
-		_, err24 := w.WriteString("\n") // newline
-		if err24 != nil {
-			fmt.Println("arrive pas a ecrire apres calc")
-		}
-	}
 
-	w.Flush()
+	tosend := intsplicetostr(result)
 
-	filetosend, _ := os.Open("result.txt")
-	sentdata, _ := io.Copy(c, filetosend)
+	fmt.Println(tosend)
 
-	fi, _ := filetosend.Stat()
-	if sentdata != fi.Size() {
-		fmt.Println("Erreur ! Je n'ai pas envoyé le bon nombre de bytes.")
-		return
-	}
+	c.Write([]byte(tosend))
 
-	fmt.Print("Bytes envoyées: ", sentdata, "\n")
 
 }
 
