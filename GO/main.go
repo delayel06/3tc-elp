@@ -53,16 +53,15 @@ func intsplicetostr(a [][]int ) string {
 }
 
 
-var wg sync.WaitGroup
 
-func calc(one [][]int, two [][]int, result [][]int, i int, j int) {
+func calc(one [][]int, two [][]int, result [][]int, i int, j int,wg *sync.WaitGroup) {
 	for k := 0; k < len(two[0]); k++ {
 		result[i][j] += one[i][k] * two[k][j]
 	}
 	wg.Done()
 }
 
-func process(mat1 [][]int, mat2 [][]int) [][]int {
+func process(mat1 [][]int, mat2 [][]int, wg *sync.WaitGroup) [][]int {
 
 	result := make([][]int, len(mat1))
 	for i := range result {
@@ -72,7 +71,7 @@ func process(mat1 [][]int, mat2 [][]int) [][]int {
 	for i := 0; i < len(mat1); i++ { // calc the matrice numbers yes
 		for j := 0; j < len(mat2[0]); j++ {
 			wg.Add(1)
-			go calc(mat1, mat2, result, i, j) // concurrence fait tout seul insh
+			go calc(mat1, mat2, result, i, j, wg) // concurrence fait tout seul insh
 			fmt.Print("Calcul matrice..\n")   // test
 			// tableaux modifiés globallement comme java
 		}
@@ -83,6 +82,8 @@ func process(mat1 [][]int, mat2 [][]int) [][]int {
 }
 
 func tcp(c net.Conn) {
+
+	var wg sync.WaitGroup
 	var stockage = make([]byte, 4096)
 	data, erreur := c.Read(stockage) // lis les données et les stock dans stockage
 
@@ -103,6 +104,8 @@ func tcp(c net.Conn) {
 		fmt.Println("(Server - data 2) Bytes reçues: ", data)
 	}
 
+	defer c.Close()
+
 	matreceived2 := string(stockage2[:data2])
 
 	matrice1 := strtointsplice(matreceived)
@@ -115,7 +118,7 @@ func tcp(c net.Conn) {
 	}
 
 	fmt.Println("Matrice 1: ", matrice1, "\n", "et 2: ", matrice2)
-	resulttemp := process(matrice1, matrice2)
+	resulttemp := process(matrice1, matrice2, &wg)
 	wg.Wait()
 	result := resulttemp
 
