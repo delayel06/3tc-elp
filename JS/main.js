@@ -7,6 +7,7 @@ import * as process from "process";
 import chalk from 'chalk';
 import fs from 'fs';
 import EventEmitter from 'events';
+import { format } from 'path';
 
 
 
@@ -117,10 +118,14 @@ async function action (cmd) {
         //console.log(prog);
 
         // Execute the command
-        await cp.exec(prog, (error) => {
+        cp.exec(prog, (error,stdout,stderr) => {
+            
             if (error) {
                 console.error(`exec error: ${error}`);
+                
             }
+
+            console.log(stdout)
         });
     }
 
