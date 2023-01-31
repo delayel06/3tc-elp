@@ -125,7 +125,7 @@ async function action (cmd) {
                 
             }
 
-            console.log(stdout)
+            console.log(`${stdout}`);
         });
     }
 
