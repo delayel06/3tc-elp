@@ -25,7 +25,7 @@ func strtointsplice(s string) [][]int {
 			re := regexp.MustCompile(`\r?`)
 			cols[j] = re.ReplaceAllString(cols[j], "")
 			// windows pourquoi ya \r a la fin de tes lignes
-			// ca m'a pris 3h a comprendre ca
+			
 
 			num, _ := strconv.Atoi(cols[j])
 
