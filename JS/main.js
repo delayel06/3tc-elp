@@ -106,7 +106,7 @@ async function action (cmd) {
 
       console.log('\n');
       for(let i = 0; i < 30; i++){
-          console.log(chalk.yellow(i+1)+'. '+ processes[i].name+' pid: ' + chalk.red(processes[i].pid) +"\n");
+          console.log(chalk.yellow(i+1)+'. '+ processes[i].name+' pid: ' + chalk.red(processes[i].pid));
       }
     }
 
@@ -118,16 +118,17 @@ async function action (cmd) {
         let prog = cmd.command.replace(/^exec /, "");
         //console.log(prog);
 
-        // Execute the command
-        cp.exec(prog, (error,stdout,stderr) => {
-            
-            if (error) {
-                console.error(`exec error: ${error}`);
-                
-            }
+        const child = cp.spawn(prog, { shell: true, stdio: 'pipe' }); // on lance le processus
 
-            console.log(`${stdout}`);
-        });
+        child.stdout.on('data', (data) => {
+        console.log(data.toString());
+        }); // on ecrit ce que le processus envoie
+
+        child.stderr.on('data', (data) => {
+        console.error(data.toString());
+        }); // on ecrit les erreurs
+
+
     }
 
     else if(/^bing/.test(cmd.command)) {
