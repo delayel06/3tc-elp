@@ -3,6 +3,7 @@ import boxen from 'boxen';
 import psList from 'ps-list';
 import cp from 'child_process';
 import { exec } from 'child_process'
+import { spawn } from 'child_process'
 import * as process from "process";
 import chalk from 'chalk';
 import fs from 'fs';
@@ -247,10 +248,16 @@ async function action (cmd) {
             });
         } else {
 
-            exec(`nohup ${name}`, (err, stdout, stderr) => {
+            let commande = name.split(" ");
+            const cmd = commande[0];
+            const args = commande[1];
 
-                console.log(stdout);
-            });
+            spawn(cmd, args, {
+            stdio: 'inherit', 
+            detached: true,
+            env: process.env,
+          }).unref(); //detached: true, pour que le processus ne soit pas lié au processus principal
+            //et .unref() pour que le processus ne soit pas bloqué par le processus principal donc en gros keep inclu !
 
         }
 
